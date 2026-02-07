@@ -44,13 +44,13 @@
                 --surface4: #222;
 
                 --text: #f0ede6;
-                --text2: #d0cdc5;
-                --muted: #8a8680;
-                --dim: #5a5650;
+                --text2: #d5d2ca;
+                --muted: #a09a94;
+                --dim: #7a756e;
 
-                --stroke: rgba(255, 255, 255, 0.07);
-                --stroke2: rgba(255, 255, 255, 0.12);
-                --stroke3: rgba(255, 255, 255, 0.18);
+                --stroke: rgba(255, 255, 255, 0.09);
+                --stroke2: rgba(255, 255, 255, 0.15);
+                --stroke3: rgba(255, 255, 255, 0.22);
 
                 --accent: #c8ff00;
                 --accent2: #dfff57;
@@ -471,13 +471,13 @@
        HERO
        ════════════════════════════════════════════ */
             .hero {
-                padding: clamp(80px, 12vw, 160px) 0 clamp(60px, 8vw, 100px);
+                padding: clamp(48px, 6vw, 80px) 0 clamp(48px, 6vw, 80px);
             }
             .hero-layout {
                 display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: clamp(32px, 5vw, 64px);
-                align-items: center;
+                grid-template-columns: 1.1fr 0.9fr;
+                gap: clamp(24px, 4vw, 48px);
+                align-items: start;
             }
             .hero-content { max-width: 560px; }
 
@@ -600,19 +600,29 @@
 
             /* #3 Scroll cue */
             .scroll-cue {
-                display: flex; flex-direction: column; align-items: center; gap: 6px;
-                margin-top: 48px; text-align: center;
-                animation: scrollCueBounce 2.5s ease-in-out infinite;
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                margin-top: 32px;
+                padding: 8px 14px;
+                border-radius: 999px;
+                border: 1px solid var(--stroke);
+                background: rgba(255,255,255,0.02);
+                color: var(--dim);
+                text-transform: uppercase;
+                letter-spacing: 0.12em;
+                font-family: var(--mono);
+                font-size: 11px;
+                align-self: flex-start;
+                transition: background 0.2s var(--ease2), border-color 0.2s var(--ease2), color 0.2s var(--ease2);
             }
-            .scroll-cue-text {
-                font-size: 12px; color: var(--dim);
-                letter-spacing: 0.04em;
+            .scroll-cue:hover {
+                background: rgba(255,255,255,0.06);
+                border-color: var(--stroke2);
+                color: var(--text);
             }
-            .scroll-cue svg { width: 16px; height: 16px; color: var(--dim); }
-            @keyframes scrollCueBounce {
-                0%,100% { transform: translateY(0); }
-                50% { transform: translateY(6px); }
-            }
+            .scroll-cue-text { color: inherit; }
+            .scroll-cue svg { width: 14px; height: 14px; color: var(--accent); }
 
             /* ─── Mock / Demo ─── */
             .mock {
@@ -622,6 +632,15 @@
                 box-shadow: var(--elev-3);
                 overflow: hidden;
                 position: relative;
+                display: flex;
+                flex-direction: column;
+                height: var(--mock-height, auto);
+                min-height: 0;
+                transition: height 0.45s var(--ease), box-shadow 0.45s var(--ease);
+            }
+            .mock.is-open {
+                height: var(--mock-open-height, auto);
+                min-height: clamp(520px, 70vh, 760px);
             }
             .mock::after {
                 content: "";
@@ -632,19 +651,19 @@
             }
             .mock-bar {
                 display: flex; align-items: center; justify-content: space-between;
-                padding: 12px 16px;
+                padding: 8px 12px;
                 border-bottom: 1px solid var(--stroke);
                 background: rgba(255,255,255,0.015);
             }
             .mock-dots { display: flex; gap: 7px; }
             .mock-dot {
-                width: 10px; height: 10px; border-radius: 50%;
+                width: 8px; height: 8px; border-radius: 50%;
                 background: rgba(255,255,255,0.08);
                 border: 1px solid rgba(255,255,255,0.06);
             }
             .mock-label {
                 font-family: var(--mono);
-                font-size: 11px; color: var(--dim);
+                font-size: 10px; color: var(--dim);
             }
 
             /* #4 Demo controls row */
@@ -691,19 +710,28 @@
 
             .mock-body {
                 display: grid;
-                grid-template-columns: 1fr 0fr;
-                min-height: 340px;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 0fr);
+                flex: 1;
+                min-height: 0;
                 transition: grid-template-columns 0.5s var(--ease);
             }
             .mock-body.drift-open {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
             }
-            .pane { padding: 16px; position: relative; }
+            .pane {
+                padding: 14px;
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                min-height: 0;
+            }
             .pane.feed-pane {
                 border-left: 1px solid var(--stroke);
                 background: rgba(255,255,255,0.01);
                 overflow: hidden;
                 min-width: 0;
+                min-height: 0;
             }
             .pane.feed-pane > * {
                 opacity: 0;
@@ -714,16 +742,20 @@
             }
 
             /* #4 Return flash */
-            .pane.chat-pane { transition: background 0.3s; }
+            .pane.chat-pane {
+                transition: background 0.3s;
+                overflow: hidden;
+                min-height: 0;
+            }
             .pane.chat-pane.returned {
                 background: rgba(200,255,0,0.04);
             }
 
             .bubble {
-                border-radius: 14px;
+                border-radius: 12px;
                 border: 1px solid var(--stroke);
-                padding: 12px 14px;
-                margin-bottom: 10px;
+                padding: 10px 12px;
+                margin-bottom: 0;
             }
             .bubble-role {
                 font-family: var(--mono);
@@ -732,14 +764,43 @@
                 letter-spacing: 0.06em; margin-bottom: 6px;
             }
             .bubble-msg {
-                font-size: 13px; color: var(--text2); line-height: 1.6;
+                font-size: 12px; color: var(--text2); line-height: 1.5;
+                white-space: pre-line;
+            }
+            .bubble-ai {
+                border-color: rgba(200,255,0,0.18);
+                background: rgba(200,255,0,0.03);
+            }
+
+            .chat-scroll,
+            .feed-scroll {
+                flex: 1;
+                min-height: 0;
+                overflow: auto;
+                display: grid;
+                gap: 8px;
+                padding-right: 4px;
+            }
+            .chat-scroll { padding-right: 2px; }
+            .chat-scroll::-webkit-scrollbar,
+            .feed-scroll::-webkit-scrollbar {
+                width: 6px;
+            }
+            .chat-scroll::-webkit-scrollbar-thumb,
+            .feed-scroll::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,0.08);
+                border-radius: 999px;
+            }
+            .chat-scroll::-webkit-scrollbar-track,
+            .feed-scroll::-webkit-scrollbar-track {
+                background: transparent;
             }
 
             .stream-indicator {
-                display: flex; align-items: center; gap: 10px;
-                padding: 10px 14px; border-radius: 12px;
+                display: flex; align-items: center; gap: 8px;
+                padding: 8px 12px; border-radius: 10px;
                 border: 1px solid var(--stroke);
-                margin-top: 8px;
+                margin-top: auto;
             }
             .pulse-dot {
                 width: 8px; height: 8px; min-width: 8px;
@@ -751,7 +812,7 @@
                 50% { opacity: 1; transform: scale(1); }
             }
             .stream-text {
-                font-family: var(--mono); font-size: 11px;
+                font-family: var(--mono); font-size: 10px;
                 color: var(--dim); line-height: 1.4;
             }
 
@@ -777,9 +838,9 @@
             .feed-tab + .feed-tab { border-left: 1px solid var(--stroke); }
 
             .feed-card {
-                border-radius: 14px;
+                border-radius: 12px;
                 border: 1px solid var(--stroke);
-                padding: 14px; margin-bottom: 10px;
+                padding: 10px 12px; margin-bottom: 0;
                 transition: border-color 0.2s, background 0.2s;
             }
             .feed-card:hover { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.02); }
@@ -801,19 +862,63 @@
                 transition: width 0.6s var(--ease);
             }
             .feed-text {
-                font-size: 12px; color: var(--muted);
-                line-height: 1.6; margin-top: 6px;
+                font-size: 11px; color: var(--muted);
+                line-height: 1.5; margin-top: 4px;
+            }
+            .feed-list {
+                display: grid;
+                gap: 8px;
+            }
+            .feed-item {
+                display: grid;
+                grid-template-columns: 36px 1fr;
+                gap: 10px;
+                padding: 8px 10px;
+                border-radius: 12px;
+                border: 1px solid var(--stroke);
+                background: rgba(255,255,255,0.02);
+            }
+            .feed-thumb {
+                width: 36px; height: 36px;
+                border-radius: 10px;
+                background: linear-gradient(140deg, rgba(200,255,0,0.2), rgba(0,229,255,0.08));
+                box-shadow: 0 0 16px rgba(200,255,0,0.12);
+            }
+            .feed-thumb.t2 {
+                background: linear-gradient(140deg, rgba(0,229,255,0.2), rgba(200,255,0,0.08));
+                box-shadow: 0 0 16px rgba(0,229,255,0.12);
+            }
+            .feed-thumb.t3 {
+                background: linear-gradient(140deg, rgba(255,255,255,0.15), rgba(200,255,0,0.1));
+            }
+            .feed-meta {
+                display: flex;
+                flex-direction: column;
+                gap: 3px;
+                min-width: 0;
+            }
+            .feed-title {
+                font-size: 12px;
+                color: var(--text);
+                font-weight: 500;
+                line-height: 1.3;
+            }
+            .feed-sub {
+                font-size: 10px;
+                color: var(--dim);
+                font-family: var(--mono);
+                letter-spacing: 0.02em;
             }
 
             .mock-footer {
                 display: flex; align-items: center; justify-content: space-between;
-                padding: 12px 16px;
+                padding: 8px 12px;
                 border-top: 1px solid var(--stroke);
                 background: rgba(255,255,255,0.015);
             }
             .mock-hint {
                 font-size: 12px; color: var(--dim);
-                max-width: 380px; line-height: 1.5;
+                max-width: 360px; line-height: 1.5;
             }
 
             /* ════════════════════════════════════════════
@@ -1382,8 +1487,8 @@
 
             /* #8 Sticky mobile CTA */
             .sticky-cta {
-                display: none;
-                position: fixed; bottom: 16px;
+                display: block;
+                position: fixed; bottom: 20px;
                 left: 50%; transform: translateX(-50%);
                 z-index: 60;
                 opacity: 0; pointer-events: none;
@@ -1397,8 +1502,10 @@
             @media (max-width: 960px) {
                 nav.primary { display: none; }
                 .burger { display: block; }
-                .hero-layout { grid-template-columns: 1fr; }
+                .hero-layout { grid-template-columns: 1fr; align-items: start; }
                 .hero-content { max-width: 100%; }
+                .mock { height: auto; }
+                .mock.is-open { min-height: 0; }
                 .stats-row { grid-template-columns: 1fr; }
                 .mock-body, .mock-body.drift-open { grid-template-columns: 1fr; }
                 .pane.feed-pane { border-left: none; border-top: 1px solid var(--stroke); }
@@ -1410,7 +1517,6 @@
                 .compat-badges { justify-content: center; }
                 .accord-body { padding-left: 24px; }
                 .accord-grid { grid-template-columns: 1fr; }
-                .sticky-cta { display: block; }
                 .scroll-cue { display: none; }
                 .data-flow { flex-wrap: wrap; }
             }
@@ -1425,7 +1531,7 @@
                 html { scroll-behavior: auto; }
                 .r { opacity: 1; transform: none; transition: none; }
                 .pulse-dot { animation: none; opacity: 0.6; }
-                .btn, .card, .step { transition: none; }
+                .btn, .card, .step, .mock { transition: none; }
                 .marquee-track { animation: none !important; }
                 .bg-mesh::before { animation: none; }
                 .glow-orb { animation: none; }
@@ -1484,7 +1590,7 @@
                     </nav>
                     <div class="header-actions">
                         <a class="btn" href="#demo">Live demo</a>
-                        <a class="btn primary" href="https://chromewebstore.google.com/detail/drift/agihdlojchhjpflceecmfknffggofdhf?hl=en&authuser=0" target="_blank">Add to Chrome</a>
+                        <a class="btn primary" href="https://chromewebstore.google.com/detail/drift/agihdlojchhjpflceecmfknffggofdhf?hl=en&authuser=0" target="_blank">Use Now</a>
                         <button class="burger" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false">
                             <span aria-hidden="true"></span>
                         </button>
@@ -1559,13 +1665,6 @@
                             </span>
                         </div>
 
-                        <div class="platforms-inline r d4">
-                            <span class="platform-chip">ChatGPT</span>
-                            <span class="platform-chip">Claude</span>
-                            <span class="platform-chip">Gemini</span>
-                            <span class="platform-chip">0 bytes collected</span>
-                        </div>
-
                         <!-- #3 Redesigned stats -->
                         <div class="stats-row r d5">
                             <div class="stat-item">
@@ -1587,10 +1686,10 @@
                         </div>
 
                         <!-- #3 Scroll cue -->
-                        <div class="scroll-cue r d6">
+                        <a class="scroll-cue r d6" href="#how">
                             <span class="scroll-cue-text">See how it works</span>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                        </div>
+                        </a>
                     </div>
 
                     <!-- MOCK DEMO (#4 enhanced) -->
@@ -1615,13 +1714,19 @@
                         </div>
                         <div class="mock-body" id="mockBody">
                             <div class="pane chat-pane" id="chatPane">
-                                <div class="bubble">
-                                    <div class="bubble-role">You</div>
-                                    <div class="bubble-msg">Explain why my code bugs out when I update state in a loop.</div>
-                                </div>
-                                <div class="bubble">
-                                    <div class="bubble-role">AI</div>
-                                    <div class="bubble-msg" id="aiMsg">Generating…</div>
+                                <div class="chat-scroll">
+                                    <div class="bubble">
+                                        <div class="bubble-role">You</div>
+                                        <div class="bubble-msg">Explain why my code bugs out when I update state in a loop.</div>
+                                    </div>
+                                    <div class="bubble">
+                                        <div class="bubble-role">You</div>
+                                        <div class="bubble-msg">I am calling setState inside forEach to build a list.</div>
+                                    </div>
+                                    <div class="bubble bubble-ai">
+                                        <div class="bubble-role">AI</div>
+                                        <div class="bubble-msg" id="aiMsg">Generating…</div>
+                                    </div>
                                 </div>
                                 <div class="stream-indicator" id="streamRow">
                                     <div class="pulse-dot" aria-hidden="true"></div>
@@ -1636,19 +1741,51 @@
                                     <button class="feed-tab" data-feed="youtube" type="button">YouTube</button>
                                     <button class="feed-tab" data-feed="news" type="button">News</button>
                                 </div>
-                                <div class="feed-card">
-                                    <div class="feed-head"><span>Drift feed</span><span id="feedStatus">idle</span></div>
-                                    <div class="feed-bar-track"><div class="feed-bar-fill" id="feedBar"></div></div>
-                                </div>
-                                <div class="feed-card">
-                                    <div class="feed-head"><span id="feedSourceLabel">Your choice</span><span>anything</span></div>
-                                    <div class="feed-text" id="feedSourceDesc">
-                                        Reels, Reddit, YouTube, news, comics — Drift doesn't judge. It just prevents the "opened a tab and lost my brain" problem.
+                                <div class="feed-scroll">
+                                    <div class="feed-card">
+                                        <div class="feed-head"><span>Drift feed</span><span id="feedStatus">idle</span></div>
+                                        <div class="feed-bar-track"><div class="feed-bar-fill" id="feedBar"></div></div>
                                     </div>
-                                </div>
-                                <div class="feed-card">
-                                    <div class="feed-head"><span>Auto-return</span><span>1 click</span></div>
-                                    <div class="feed-text">When generation ends, Drift nudges you back. The point is less scrolling, not more.</div>
+                                    <div class="feed-card">
+                                        <div class="feed-head"><span id="feedSourceLabel">Your choice</span><span>anything</span></div>
+                                        <div class="feed-text" id="feedSourceDesc">
+                                            Reels, Reddit, YouTube, news, comics. Drift does not judge. It just prevents the "opened a tab and lost my brain" problem.
+                                        </div>
+                                    </div>
+                                    <div class="feed-card">
+                                        <div class="feed-head"><span>Auto-return</span><span>1 click</span></div>
+                                        <div class="feed-text">When generation ends, Drift nudges you back. The point is less scrolling, not more.</div>
+                                    </div>
+                                    <div class="feed-list">
+                                        <div class="feed-item">
+                                            <div class="feed-thumb"></div>
+                                            <div class="feed-meta">
+                                                <div class="feed-title">Devlog: why state loops happen (and how to stop them)</div>
+                                                <div class="feed-sub">3 min read · trending</div>
+                                            </div>
+                                        </div>
+                                        <div class="feed-item">
+                                            <div class="feed-thumb t2"></div>
+                                            <div class="feed-meta">
+                                                <div class="feed-title">Five prompt patterns that unlock deeper answers</div>
+                                                <div class="feed-sub">Saved · 1.2k</div>
+                                            </div>
+                                        </div>
+                                        <div class="feed-item">
+                                            <div class="feed-thumb t3"></div>
+                                            <div class="feed-meta">
+                                                <div class="feed-title">Shorts: 12-sec pasta and other tiny wins</div>
+                                                <div class="feed-sub">Reels · 24 new</div>
+                                            </div>
+                                        </div>
+                                        <div class="feed-item">
+                                            <div class="feed-thumb"></div>
+                                            <div class="feed-meta">
+                                                <div class="feed-title">Design teardown: why this landing page converts</div>
+                                                <div class="feed-sub">Case study · 8 min</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1673,7 +1810,6 @@
                             <div class="mq-item"><span class="mq-word italic">Invisible</span><span class="mq-tooltip">Only appears during waits</span><span class="mq-sep"></span></div>
                             <div class="mq-item"><span class="mq-word">Instant return</span><span class="mq-tooltip">One-click snap back</span><span class="mq-sep"></span></div>
                             <div class="mq-item"><span class="mq-word italic">Focused</span><span class="mq-tooltip">Less scrolling, not more</span><span class="mq-sep"></span></div>
-                            <div class="mq-item"><span class="mq-word">Open source</span><span class="mq-tooltip">Fully auditable code</span><span class="mq-sep"></span></div>
                             <div class="mq-item"><span class="mq-word italic">Lightweight</span><span class="mq-tooltip">Minimal resource usage</span><span class="mq-sep"></span></div>
                             <div class="mq-item"><span class="mq-word">Configurable</span><span class="mq-tooltip">Custom delay & window</span><span class="mq-sep"></span></div>
                             <div class="mq-item"><span class="mq-word italic">Free forever</span><span class="mq-tooltip">No premium, no upsells</span><span class="mq-sep"></span></div>
@@ -1687,7 +1823,6 @@
                             <div class="mq-item"><span class="mq-word italic">Invisible</span><span class="mq-tooltip">Only appears during waits</span><span class="mq-sep"></span></div>
                             <div class="mq-item"><span class="mq-word">Instant return</span><span class="mq-tooltip">One-click snap back</span><span class="mq-sep"></span></div>
                             <div class="mq-item"><span class="mq-word italic">Focused</span><span class="mq-tooltip">Less scrolling, not more</span><span class="mq-sep"></span></div>
-                            <div class="mq-item"><span class="mq-word">Open source</span><span class="mq-tooltip">Fully auditable code</span><span class="mq-sep"></span></div>
                             <div class="mq-item"><span class="mq-word italic">Lightweight</span><span class="mq-tooltip">Minimal resource usage</span><span class="mq-sep"></span></div>
                             <div class="mq-item"><span class="mq-word">Configurable</span><span class="mq-tooltip">Custom delay & window</span><span class="mq-sep"></span></div>
                             <div class="mq-item"><span class="mq-word italic">Free forever</span><span class="mq-tooltip">No premium, no upsells</span><span class="mq-sep"></span></div>
@@ -1851,7 +1986,7 @@
                                 <div class="data-flow-node blocked">☁️ Server</div>
                             </div>
 
-                            <p class="tldr-date">Last updated: February 7, 2026 · <a href="https://github.com/user/drift" style="color:var(--accent);border-bottom:1px solid rgba(200,255,0,0.2)">Read the code →</a></p>
+                            <p class="tldr-date">Last updated: February 7, 2026</p>
                         </div>
 
                         <details class="accord r d2" open>
@@ -2039,10 +2174,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                             0 analytics
                         </span>
-                        <span class="proof-pill">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                            Open source
-                        </span>
+
                         <span class="proof-pill">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                             5 permissions
@@ -2065,7 +2197,7 @@
 
         <!-- #8 Sticky mobile CTA -->
         <div class="sticky-cta" id="stickyCta">
-            <a class="btn primary" href="https://chromewebstore.google.com/detail/drift/agihdlojchhjpflceecmfknffggofdhf?hl=en&authuser=0" target="_blank" style="padding:12px 24px;font-size:14px;box-shadow:0 8px 32px rgba(0,0,0,0.4)">
+            <a class="btn primary" href="#install" style="padding:12px 24px;font-size:14px;box-shadow:0 8px 32px rgba(0,0,0,0.4)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true">
                     <circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12l4 4 4-4"/>
                 </svg>
@@ -2147,9 +2279,54 @@
                 const feedBar = document.getElementById('feedBar');
                 const mockBody = document.getElementById('mockBody');
                 const chatPane = document.getElementById('chatPane');
+                const demo = document.getElementById('demo');
+                const heroContent = document.querySelector('.hero-content');
                 let running = false;
                 let speedMode = 'fast';
                 const sleep = ms => new Promise(r => setTimeout(r, ms));
+                const FAST_RESPONSE = [
+                    "Quick answer:",
+                    "- setState inside loops reads stale state",
+                    "- build the array first, then set once",
+                    "- use setState(prev => ...) for derived updates"
+                ].join("\n");
+                const LONG_RESPONSE = [
+                    "Longer answer:",
+                    "1) React batches updates, so looped sets fight each other",
+                    "2) compute next state in a temp variable, then update once",
+                    "3) if you must iterate, always use functional updates"
+                ].join("\n");
+
+                const canSyncHeight = () => !window.matchMedia('(max-width: 960px)').matches;
+                const syncDemoHeight = () => {
+                    if (!demo || !heroContent) return;
+                    if (!canSyncHeight()) {
+                        demo.style.removeProperty('--mock-height');
+                        demo.style.removeProperty('--mock-open-height');
+                        return;
+                    }
+                    const h = Math.ceil(heroContent.getBoundingClientRect().height);
+                    if (h > 0) {
+                        demo.style.setProperty('--mock-height', `${h}px`);
+                        const openH = Math.round(Math.min(Math.max(h + 160, 560), window.innerHeight * 0.85));
+                        demo.style.setProperty('--mock-open-height', `${openH}px`);
+                    }
+                };
+                const queueSync = () => requestAnimationFrame(syncDemoHeight);
+                queueSync();
+                addEventListener('resize', queueSync);
+                if (document.fonts?.ready) document.fonts.ready.then(queueSync);
+
+                const openDemo = () => {
+                    if (!demo) return;
+                    demo.classList.add('is-open');
+                    syncDemoHeight();
+                };
+                const closeDemo = () => {
+                    if (!demo) return;
+                    demo.classList.remove('is-open');
+                    queueSync();
+                };
 
                 // Speed toggle
                 document.querySelectorAll('.speed-opt').forEach(opt => {
@@ -2189,16 +2366,20 @@
                     streamLabel.textContent = 'Model is thinking. Drift will open if this takes long enough.';
                     mockBody.classList.remove('drift-open');
                     chatPane.classList.remove('returned');
+                    closeDemo();
 
                     feedStatus.textContent = 'waiting';
                     await sleep(isSlow ? 1200 : 700);
 
                     if (!isSlow) {
                         // Fast: Drift stays closed
-                        aiMsg.textContent = 'Quick answer. Drift stays closed.';
+                        aiMsg.textContent = FAST_RESPONSE;
                         streamLabel.textContent = 'Fast response detected — no window opened.';
+                        feedStatus.textContent = 'closed';
                         feedBar.style.width = '22%';
-                        await sleep(1200);
+                        await sleep(1600);
+                        running = false;
+                        return;
                     }
 
                     // Long generation: slide feed pane open
@@ -2206,18 +2387,20 @@
                     streamLabel.textContent = 'Long generation detected — Drift opens your feed.';
                     feedStatus.textContent = 'open';
                     mockBody.classList.add('drift-open');
+                    openDemo();
                     feedBar.style.width = '78%';
-                    await sleep(isSlow ? 2500 : 1200);
+                    await sleep(2400);
 
                     // Return: flash + close
-                    aiMsg.textContent = 'Done. Drift nudges you back to the chat.';
+                    aiMsg.textContent = LONG_RESPONSE;
                     streamLabel.textContent = 'Generation complete. Click once to return.';
                     feedStatus.textContent = 'return';
                     feedBar.style.width = '100%';
                     mockBody.classList.remove('drift-open');
                     chatPane.classList.add('returned');
+                    closeDemo();
 
-                    await sleep(1200);
+                    await sleep(1600);
                     chatPane.classList.remove('returned');
                     running = false;
                 });
@@ -2247,11 +2430,23 @@
             (() => {
                 const sticky = document.getElementById('stickyCta');
                 const hero = document.getElementById('top');
-                if (!sticky || !hero) return;
+                const install = document.getElementById('install');
+                if (!sticky || !hero || !install) return;
+                
+                let heroVisible = true;
+                let installVisible = false;
+                
                 const io = new IntersectionObserver(entries => {
-                    entries.forEach(e => sticky.classList.toggle('visible', !e.isIntersecting));
+                    entries.forEach(e => {
+                        if (e.target === hero) heroVisible = e.isIntersecting;
+                        if (e.target === install) installVisible = e.isIntersecting;
+                    });
+                    // Show sticky only if hero is NOT visible AND install is NOT visible
+                    sticky.classList.toggle('visible', !heroVisible && !installVisible);
                 }, { threshold: 0 });
+                
                 io.observe(hero);
+                io.observe(install);
             })();
 
             /* ─── #11 Page Visibility API: pause animations when hidden ─── */
