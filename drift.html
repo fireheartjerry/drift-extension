@@ -729,7 +729,7 @@
                 </div>
             </section>
 
-            <!-- PRIVACY (#7 enhanced) -->
+<!-- PRIVACY (#7 enhanced) -->
             <section class="sec" id="privacy">
                 <div
                     class="sec-atmosphere sec-atmo-privacy"
@@ -750,9 +750,12 @@
                             <div class="tldr-tag">TL;DR</div>
                             <p class="tldr-text">
                                 Drift operates entirely on your device. Zero
-                                data collection. Zero external transmission.
-                                Zero third-party sharing. All settings stored
-                                locally using Chrome's encrypted storage APIs.
+                                data collection. Zero third-party sharing. All
+                                settings stored locally using Chrome's encrypted
+                                storage APIs. Fonts are loaded from Google Fonts
+                                and settings may sync across your Chrome
+                                browsers via Chrome's built-in sync — no
+                                proprietary servers involved.
                             </p>
 
                             <!-- Data flow diagram -->
@@ -766,7 +769,7 @@
                                 </div>
                                 <div class="data-flow-arrow blocked">✕</div>
                                 <div class="data-flow-node blocked">
-                                    ☁️ No Servers
+                                    ☁️ No Drift Servers
                                 </div>
                             </div>
 
@@ -812,8 +815,8 @@
                                     window displaying content of your choice
                                     (such as social media feeds, news sites, or
                                     any web page). When the AI finishes
-                                    generating its response, Drift sends a
-                                    browser notification and optionally returns
+                                    generating its response, Drift displays an
+                                    in-window overlay and optionally returns
                                     focus to your original chat tab.
                                 </p>
                                 <p>
@@ -872,8 +875,7 @@
                                         interfaces
                                     </li>
                                     <li>
-                                        Keystrokes, form inputs, or clipboard
-                                        data
+                                        Keystrokes or form inputs
                                     </li>
                                     <li>
                                         Authentication credentials, tokens, or
@@ -896,11 +898,19 @@
                                     </li>
                                 </ul>
                                 <p>
+                                    <strong>Clipboard usage:</strong> Drift's
+                                    onboarding demo includes a "copy prompt"
+                                    button that writes a sample prompt to your
+                                    clipboard when you click it. This is a
+                                    write-only action triggered explicitly by
+                                    you — Drift never reads clipboard content.
+                                </p><br>
+                                <p>
                                     Drift operates as a purely client-side
                                     extension with no backend infrastructure.
-                                    There are no servers, databases, or external
-                                    services that receive data from your
-                                    installation.
+                                    There are no Drift-operated servers,
+                                    databases, or external services that receive
+                                    data from your installation.
                                 </p>
                             </div>
                         </details>
@@ -934,52 +944,115 @@
                             </summary>
                             <div class="accord-body">
                                 <p>
-                                    Drift stores configuration data locally
-                                    using Chrome's
-                                    <code>chrome.storage.local</code> API, which
-                                    keeps data on your device and syncs it
-                                    across your signed-in Chrome browsers (if
-                                    sync is enabled in Chrome settings). This
-                                    storage is encrypted by Chrome and never
-                                    leaves your control.
+                                    Drift stores configuration data using
+                                    Chrome's
+                                    <code>chrome.storage.sync</code> API (with
+                                    a <code>chrome.storage.local</code>
+                                    fallback). The sync API keeps data encrypted
+                                    on your device and, if you have Chrome Sync
+                                    enabled in your browser settings, may
+                                    replicate your settings across your
+                                    signed-in Chrome browsers via Google's
+                                    infrastructure. This is standard Chrome
+                                    extension behavior and is governed by
+                                    Google's Chrome privacy policies. If Chrome
+                                    Sync is disabled, data remains entirely on
+                                    your device.
                                 </p>
-                                <p><strong>Stored data includes:</strong></p>
+                                <p>
+                                    Additionally, certain data is stored
+                                    exclusively on your device using
+                                    <code>chrome.storage.local</code> and
+                                    <code>chrome.storage.session</code> (which
+                                    never syncs across devices).
+                                </p>
+                                <p><strong>Synced data</strong> (<code>chrome.storage.sync</code>) <strong>includes:</strong></p>
                                 <ul>
                                     <li>
                                         <strong>User preferences:</strong>
                                         Target URL for the drift window, window
-                                        dimensions (width, height), window
-                                        position (x, y coordinates), trigger
-                                        delay duration, focus return behavior
-                                        toggle, and UI display settings.
+                                        size preset, window position preference,
+                                        trigger delay duration, completion
+                                        behavior toggle, and advanced settings
+                                        (auto-open, control opacity, auto-close
+                                        timer).
                                     </li>
+                                    <li>
+                                        <strong>Drift profiles:</strong> Saved
+                                        profile configurations including URLs,
+                                        display names, and window bounds for
+                                        each profile.
+                                    </li>
+                                </ul>
+                                <p><strong>Local-only data</strong> (<code>chrome.storage.local</code>) <strong>includes:</strong></p>
+                                <ul>
                                     <li>
                                         <strong>Calibration data:</strong> Saved
                                         window position and dimensions from the
-                                        calibration tool (if you use the
-                                        Instagram calibration feature).
+                                        calibration tool.
                                     </li>
                                     <li>
                                         <strong>Session state:</strong>
-                                        Temporary boolean flags indicating
-                                        whether the onboarding flow has been
-                                        completed and whether a drift window is
-                                        currently open.
+                                        Boolean flags indicating whether the
+                                        onboarding flow has been completed,
+                                        whether the demo has been run, and
+                                        whether post-demo confirmation has been
+                                        shown.
                                     </li>
                                     <li>
-                                        <strong>Usage counter:</strong> A simple
-                                        integer counting how many times the
-                                        drift window has been opened, used
-                                        solely to trigger optional UI prompts
-                                        within the extension.
+                                        <strong>Usage counters:</strong> A
+                                        simple integer counting how many times
+                                        the drift window has been opened
+                                        (<code>driftCount</code>), used solely
+                                        to trigger optional UI prompts within
+                                        the extension (such as the "pin
+                                        extension" or "leave a review" banners).
+                                    </li>
+                                    <li>
+                                        <strong>Activity stats:</strong> An
+                                        aggregate snapshot
+                                        (<code>driftStats</code>) tracking
+                                        total AI messages observed, total
+                                        milliseconds spent waiting, and total
+                                        drift prompts shown — displayed in
+                                        Drift's floating control modal. You can
+                                        reset these at any time via the "Reset"
+                                        button.
+                                    </li>
+                                    <li>
+                                        <strong>UI state flags:</strong>
+                                        Whether the "pin extension" banner and
+                                        "leave a review" banner have been
+                                        dismissed, the last extension version
+                                        seen (to show update notes), and the
+                                        floating control's position on each AI
+                                        site.
+                                    </li>
+                                </ul>
+                                <p><strong>Session-only data</strong> (<code>chrome.storage.session</code>) <strong>includes:</strong></p>
+                                <ul>
+                                    <li>
+                                        <strong>Drift window ID:</strong>
+                                        Temporary reference to the currently
+                                        open drift window, used for recovery if
+                                        the service worker restarts. Cleared
+                                        when the browser closes.
+                                    </li>
+                                    <li>
+                                        <strong>Active generation sessions:</strong>
+                                        Temporary tracking of which tabs are
+                                        currently generating AI responses, used
+                                        to manage drift window lifecycle.
                                     </li>
                                 </ul>
                                 <p>
                                     <strong>How this data is used:</strong>
                                     Exclusively to restore your extension
-                                    settings across browser sessions and
-                                    maintain window positioning consistency.
-                                    This data never leaves your device.
+                                    settings across browser sessions, maintain
+                                    window positioning consistency, and display
+                                    your personal activity summary. None of this
+                                    data is transmitted to Drift-operated
+                                    servers.
                                 </p>
                                 <p>
                                     <strong>How to delete this data:</strong>
@@ -988,7 +1061,9 @@
                                     extension data by visiting
                                     <code>chrome://extensions</code>, locating
                                     Drift, clicking "Details," and selecting
-                                    "Remove extension."
+                                    "Remove extension." Activity stats can be
+                                    individually reset from the floating
+                                    control's modal.
                                 </p>
                             </div>
                         </details>
@@ -1040,21 +1115,23 @@
                                             <td>
                                                 Save and retrieve user
                                                 preferences, calibration data,
-                                                and session state
+                                                activity stats, and session
+                                                state
                                             </td>
                                             <td>
-                                                Local device only, encrypted by
-                                                Chrome
+                                                Local device (encrypted by
+                                                Chrome); settings may sync
+                                                across devices via Chrome Sync
+                                                if enabled
                                             </td>
                                         </tr>
                                         <tr>
                                             <td><code>tabs</code></td>
                                             <td>
                                                 Identify which tab contains an
-                                                active AI chat interface, send
-                                                notifications when generation
-                                                completes, and optionally return
-                                                focus to the AI tab
+                                                active AI chat interface and
+                                                optionally return focus to the
+                                                AI tab when generation completes
                                             </td>
                                             <td>
                                                 Limited to detecting tab state
@@ -1166,7 +1243,7 @@
                                     Access conversation content, read
                                     authentication cookies, track browsing
                                     history, inject ads or affiliate links, or
-                                    communicate with external servers.
+                                    communicate with Drift-operated servers.
                                 </p>
                             </div>
                         </details>
@@ -1200,23 +1277,56 @@
                             <div class="accord-body">
                                 <p>
                                     <strong
-                                        >Drift does not integrate with any
-                                        third-party services.</strong
+                                        >Drift does not operate any proprietary
+                                        backend services.</strong
                                     >
-                                    There are no analytics providers, crash
-                                    reporting tools, advertising networks, or
-                                    external APIs. When you configure Drift to
-                                    open a specific website (such as Instagram,
-                                    Reddit, or Twitter), you are directly
-                                    loading that website in a browser window —
-                                    Drift acts only as a launcher and does not
-                                    intercept, modify, or observe the content
-                                    loaded in the drift window.
+                                    There are no Drift-operated analytics
+                                    providers, crash reporting tools,
+                                    advertising networks, or APIs. When you
+                                    configure Drift to open a specific website
+                                    (such as Instagram, Reddit, or Twitter), you
+                                    are directly loading that website in a
+                                    browser window — Drift acts only as a
+                                    launcher and does not intercept, modify, or
+                                    observe the content loaded in the drift
+                                    window.
                                 </p>
                                 <p>
+                                    <strong>Third-party services used:</strong>
+                                </p>
+                                <ul>
+                                    <li>
+                                        <strong>Google Fonts:</strong> Drift
+                                        loads typefaces (Syne, Plus Jakarta
+                                        Sans, Instrument Serif, DM Sans,
+                                        JetBrains Mono) from Google Fonts
+                                        (<code>fonts.googleapis.com</code> and
+                                        <code>fonts.gstatic.com</code>) for UI
+                                        rendering. These requests are subject to
+                                        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>.
+                                        No personal data is sent by Drift, but
+                                        your browser transmits standard request
+                                        headers (IP address, user agent) as part
+                                        of loading the fonts.
+                                    </li>
+                                    <li>
+                                        <strong>Chrome Sync (via <code>chrome.storage.sync</code>):</strong>
+                                        If you have Chrome Sync enabled in your
+                                        browser settings, your Drift preferences
+                                        (window size, delay, URL, profiles) may
+                                        be synced across your signed-in Chrome
+                                        browsers through Google's
+                                        infrastructure. This is standard Chrome
+                                        extension behavior, governed by
+                                        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>.
+                                        Drift does not control or have access to
+                                        this sync process.
+                                    </li>
+                                </ul>
+                                <p>
                                     <strong>Data sharing:</strong> None. Drift
-                                    has no data to share because it collects no
-                                    data.
+                                    has no user data to share because it
+                                    collects no personal data.
                                 </p>
                                 <p>
                                     <strong>Data selling:</strong> Drift does
@@ -1257,25 +1367,28 @@
                             </summary>
                             <div class="accord-body">
                                 <p>
-                                    Since Drift stores all data locally using
-                                    Chrome's built-in
-                                    <code>chrome.storage</code> API, your
+                                    Drift stores all data using Chrome's
+                                    built-in storage APIs
+                                    (<code>chrome.storage.sync</code>,
+                                    <code>chrome.storage.local</code>, and
+                                    <code>chrome.storage.session</code>). Your
                                     settings inherit Chrome's security model:
                                     data is encrypted at rest, isolated from
                                     other extensions, and protected by the
                                     browser's sandboxing architecture. Drift's
                                     code is fully self-contained in the
-                                    extension package with no external script
-                                    loading, no <code>eval()</code> usage, and
-                                    no remote code execution, complying with
-                                    Manifest V3 security requirements.
+                                    extension package with no
+                                    <code>eval()</code> usage and no remote code
+                                    execution, complying with Manifest V3
+                                    security requirements.
                                 </p>
                                 <p>
-                                    <strong>No data in transit:</strong> Drift
-                                    does not transmit data over networks, so
-                                    there are no HTTPS connections to secure or
-                                    encryption protocols to implement beyond
-                                    what Chrome already provides.
+                                    <strong>External requests:</strong> The only
+                                    network requests initiated by Drift itself
+                                    are font stylesheet loads from Google Fonts
+                                    for UI rendering. Drift does not transmit
+                                    user data, settings, or analytics over the
+                                    network.
                                 </p>
                             </div>
                         </details>
@@ -1310,8 +1423,8 @@
                                     Drift does not knowingly collect personal
                                     information from anyone, including children
                                     under the age of 13. Since Drift collects no
-                                    data whatsoever, it is inherently compliant
-                                    with the Children's Online Privacy
+                                    personal data whatsoever, it is inherently
+                                    compliant with the Children's Online Privacy
                                     Protection Act (COPPA) and similar
                                     international regulations.
                                 </p>
@@ -1346,14 +1459,14 @@
                             <div class="accord-body">
                                 <p>
                                     If Drift's privacy practices change
-                                    materially (such as introducing analytics or
-                                    external services), this policy will be
-                                    updated with a new "Last Updated" date.
-                                    Significant changes will be communicated
-                                    through the extension's update notes in the
-                                    Chrome Web Store. Continued use of Drift
-                                    after such changes constitutes acceptance of
-                                    the revised policy.
+                                    materially (such as introducing proprietary
+                                    analytics or backend services), this policy
+                                    will be updated with a new "Last Updated"
+                                    date. Significant changes will be
+                                    communicated through the extension's update
+                                    notes in the Chrome Web Store. Continued use
+                                    of Drift after such changes constitutes
+                                    acceptance of the revised policy.
                                 </p>
                                 <p>
                                     Given Drift's privacy-first architecture,
@@ -1391,9 +1504,9 @@
                             <div class="accord-body">
                                 <p>
                                     For privacy-related questions, data deletion
-                                    requests (though there is no data to
-                                    delete), or general inquiries about Drift's
-                                    privacy practices, contact:
+                                    requests (though there is no personal data
+                                    to delete), or general inquiries about
+                                    Drift's privacy practices, contact:
                                 </p>
                                 <p>
                                     <strong>Email:</strong>
@@ -1440,8 +1553,8 @@
                                     delete, and control their personal data.
                                     Since Drift collects no personal data, these
                                     rights are inherently satisfied: there is no
-                                    data to access, export, or delete from
-                                    Drift's systems (because Drift has no
+                                    personal data to access, export, or delete
+                                    from Drift's systems (because Drift has no
                                     systems).
                                 </p>
                                 <p>
@@ -1449,7 +1562,10 @@
                                     maintain complete control over locally
                                     stored settings. To delete all Drift data,
                                     uninstall the extension from
-                                    <code>chrome://extensions</code>.
+                                    <code>chrome://extensions</code>. To
+                                    disable Chrome Sync for extension data, go
+                                    to <code>chrome://settings/syncSetup</code>
+                                    and toggle off Extensions.
                                 </p>
                             </div>
                         </details>
@@ -1510,13 +1626,14 @@
                                     exceeds your configured trigger delay
                                     (default: 3 seconds), Drift opens a new
                                     browser window at your chosen URL. When the
-                                    AI finishes generating, Drift sends a
-                                    notification and optionally refocuses your
-                                    original chat tab.
+                                    AI finishes generating, Drift displays a
+                                    "Response ready" overlay in the drift window
+                                    and optionally refocuses your original chat
+                                    tab.
                                 </p>
                                 <p>
                                     The extension runs entirely locally in your
-                                    browser — no external servers, no data
+                                    browser — no Drift-operated servers, no data
                                     transmission, no tracking.
                                 </p>
                             </div>
@@ -1554,7 +1671,7 @@
                                     <li>
                                         <strong>ChatGPT:</strong>
                                         chat.openai.com and chatgpt.com (all
-                                        models including GPT-4, GPT-3.5)
+                                        models)
                                     </li>
                                     <li>
                                         <strong>Claude:</strong> claude.ai (all
@@ -1612,9 +1729,10 @@
                                 <p>
                                     This reduces accidental 20-minute rabbit
                                     holes that start from tab-switching boredom.
-                                    Drift's notification system ensures you
-                                    never miss when your AI conversation is
-                                    ready to continue.
+                                    Drift's "Response ready" overlay and
+                                    optional auto-refocus ensure you never miss
+                                    when your AI conversation is ready to
+                                    continue.
                                 </p>
                             </div>
                         </details>
@@ -1736,18 +1854,22 @@
                             </summary>
                             <div class="accord-body">
                                 <p>
-                                    <strong>Zero data collection.</strong> Drift
-                                    collects no personal information, browsing
-                                    history, analytics, telemetry, or usage
-                                    data. All settings (window size, position,
-                                    target URL, trigger delay) are stored
-                                    locally on your device using Chrome's
-                                    encrypted <code>chrome.storage</code> API.
+                                    <strong>Zero personal data collection.</strong>
+                                    Drift collects no personal information,
+                                    browsing history, or telemetry. All settings
+                                    (window size, position, target URL, trigger
+                                    delay) and aggregate activity stats
+                                    (messages observed, wait time, drift
+                                    prompts) are stored on your device using
+                                    Chrome's encrypted
+                                    <code>chrome.storage</code> APIs. Settings
+                                    may sync across your Chrome browsers if
+                                    Chrome Sync is enabled.
                                 </p>
                                 <p>
-                                    There are no servers, databases, or external
-                                    services. Drift is a completely client-side
-                                    extension.
+                                    There are no Drift-operated servers,
+                                    databases, or external services. Drift is a
+                                    completely client-side extension.
                                 </p>
                             </div>
                         </details>
@@ -1786,7 +1908,7 @@
                                     <li>
                                         <strong>storage:</strong> Save your
                                         settings locally (window size, delay,
-                                        URL preferences)
+                                        URL preferences, activity stats)
                                     </li>
                                     <li>
                                         <strong>tabs:</strong> Detect which tab
@@ -1860,8 +1982,8 @@
                                 </p>
                                 <p>
                                     Drift also includes an optional calibration
-                                    tool for Instagram to help you position the
-                                    window precisely over your feed.
+                                    tool to help you position the window
+                                    precisely over your chosen site's feed.
                                 </p>
                             </div>
                         </details>
@@ -1896,18 +2018,20 @@
                                 <p>Yes. You can configure:</p>
                                 <ul>
                                     <li>
-                                        <strong>Window dimensions:</strong> Set
-                                        custom width and height in pixels
+                                        <strong>Window size preset:</strong>
+                                        Choose between compact, standard, or
+                                        wide
                                     </li>
                                     <li>
-                                        <strong>Window position:</strong> Define
-                                        exact x/y screen coordinates
+                                        <strong>Window position:</strong>
+                                        Drag and resize during calibration mode
+                                        to set exact placement
                                     </li>
                                     <li>
                                         <strong>Calibration mode:</strong> Use
-                                        the visual overlay tool (works with
-                                        Instagram) to drag and position the
-                                        window precisely, then save coordinates
+                                        the visual overlay tool to drag and
+                                        position the window precisely, then save
+                                        coordinates
                                     </li>
                                 </ul>
                                 <p>
@@ -1947,10 +2071,9 @@
                                 <p>
                                     Yes. Drift respects your configured window
                                     position coordinates, so you can position
-                                    the drift window on a secondary monitor by
-                                    setting appropriate x/y values. The
-                                    calibration tool works across displays as
-                                    well.
+                                    the drift window on a secondary monitor
+                                    using the calibration tool. The saved bounds
+                                    work across displays.
                                 </p>
                             </div>
                         </details>
@@ -2002,7 +2125,7 @@
                                         responding?</span
                                     >
                                     <span class="accord-hint"
-                                        >Notification + optional refocus</span
+                                        >Visual overlay + optional refocus</span
                                     >
                                 </span>
                                 <span class="accord-chev"
@@ -2022,13 +2145,14 @@
                             <div class="accord-body">
                                 <p>
                                     When the AI completes its response, Drift
-                                    sends a browser notification alerting you
-                                    that your conversation is ready. The drift
-                                    window remains open until you close it
-                                    manually.
+                                    displays a "Response ready" overlay inside
+                                    the drift window with a brief progress
+                                    animation, then minimizes the window. This
+                                    gives you a clear visual signal that your
+                                    conversation is ready to continue.
                                 </p>
                                 <p>
-                                    You can optionally enable "auto-focus" in
+                                    You can optionally enable "refocus" in
                                     settings to have Drift automatically switch
                                     your browser focus back to the AI chat tab
                                     when generation completes.
@@ -2213,8 +2337,7 @@
                                     observe DOM changes. The background service
                                     worker is idle except when managing active
                                     drift windows. There is no continuous
-                                    polling, no network requests, and no heavy
-                                    computation.
+                                    polling and no heavy computation.
                                 </p>
                             </div>
                         </details>
@@ -2297,11 +2420,11 @@
                                 </ol>
                                 <p>
                                     All locally stored settings (window
-                                    position, preferences, calibration data) are
-                                    automatically deleted when you uninstall the
-                                    extension. There is no data to clean up
-                                    elsewhere since Drift uses no external
-                                    servers.
+                                    position, preferences, calibration data,
+                                    activity stats) are automatically deleted
+                                    when you uninstall the extension. There is
+                                    no data to clean up elsewhere since Drift
+                                    uses no proprietary servers.
                                 </p>
                             </div>
                         </details>
