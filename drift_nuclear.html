@@ -1,0 +1,3062 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="color-scheme" content="dark" />
+        <meta name="theme-color" content="#070707" />
+        <title>Drift — Reclaim the Wait</title>
+
+        <meta
+            name="description"
+            content="Drift opens a scrollable feed while ChatGPT, Claude, or Gemini generates. Reclaim every second of wait time."
+        />
+        <meta property="og:title" content="Drift — Scroll While AI Thinks" />
+        <meta
+            property="og:description"
+            content="Don't watch AI think. Drift opens your feed while AI generates responses, then snaps you back."
+        />
+        <meta property="og:type" content="website" />
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+
+        <style>
+            :root {
+                --bg: #050505;
+                --bg1: #0a0a0a;
+                --surface: #0e0e0e;
+                --surface2: #131313;
+                --surface3: #1a1a1a;
+                --surface4: #222;
+
+                --text: #f0ede6;
+                --text2: #ccc8be;
+                --muted: #8a8680;
+                --dim: #5a5650;
+
+                --stroke: rgba(255, 255, 255, 0.07);
+                --stroke2: rgba(255, 255, 255, 0.12);
+                --stroke3: rgba(255, 255, 255, 0.18);
+
+                --accent: #c8ff00;
+                --accent2: #dfff57;
+                --accentGlow: rgba(200, 255, 0, 0.08);
+                --accentGlow2: rgba(200, 255, 0, 0.15);
+                --accentGlow3: rgba(200, 255, 0, 0.25);
+
+                --cyan: #00e5ff;
+                --cyanGlow: rgba(0, 229, 255, 0.06);
+                --cyanGlow2: rgba(0, 229, 255, 0.12);
+
+                --serif: "Instrument Serif", Georgia, serif;
+                --sans: "DM Sans", system-ui, -apple-system, sans-serif;
+                --mono:
+                    "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+                --r-sm: 12px;
+                --r-md: 18px;
+                --r-lg: 24px;
+                --r-xl: 32px;
+
+                --container: min(
+                    1120px,
+                    calc(100% - 2 * clamp(20px, 4vw, 48px))
+                );
+
+                --ease: cubic-bezier(0.16, 1, 0.3, 1);
+                --ease2: cubic-bezier(0.4, 0, 0.2, 1);
+                --ease3: cubic-bezier(0.22, 0.61, 0.36, 1);
+            }
+
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+            html {
+                scroll-behavior: smooth;
+                -webkit-font-smoothing: antialiased;
+            }
+            body {
+                font-family: var(--sans);
+                color: var(--text);
+                background: var(--bg);
+                overflow-x: hidden;
+                line-height: 1.6;
+            }
+            a {
+                color: inherit;
+                text-decoration: none;
+            }
+            ::selection {
+                background: var(--accent);
+                color: #050505;
+            }
+            img {
+                max-width: 100%;
+                display: block;
+            }
+            button {
+                font-family: inherit;
+            }
+
+            /* ════════════════════════════════════════════
+       BACKGROUND SYSTEM — layered atmosphere
+       ════════════════════════════════════════════ */
+
+            /* Layer 1: Noise texture */
+            body::before {
+                content: "";
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: 0;
+                opacity: 0.028;
+                background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+                background-size: 200px;
+            }
+
+            /* Layer 2: Radial vignette */
+            body::after {
+                content: "";
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: 0;
+                background: radial-gradient(
+                    ellipse 120% 80% at 50% 40%,
+                    transparent 40%,
+                    rgba(0, 0, 0, 0.5) 100%
+                );
+            }
+
+            /* Layer 3: Animated gradient mesh */
+            .bg-mesh {
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: 0;
+                overflow: hidden;
+            }
+            .bg-mesh::before {
+                content: "";
+                position: absolute;
+                width: 200%;
+                height: 200%;
+                left: -50%;
+                top: -50%;
+                background:
+                    radial-gradient(
+                        ellipse 600px 500px at 20% 25%,
+                        rgba(200, 255, 0, 0.06) 0%,
+                        transparent 60%
+                    ),
+                    radial-gradient(
+                        ellipse 500px 400px at 75% 20%,
+                        rgba(0, 229, 255, 0.04) 0%,
+                        transparent 55%
+                    ),
+                    radial-gradient(
+                        ellipse 700px 600px at 60% 70%,
+                        rgba(200, 255, 0, 0.035) 0%,
+                        transparent 60%
+                    ),
+                    radial-gradient(
+                        ellipse 400px 350px at 10% 80%,
+                        rgba(0, 229, 255, 0.03) 0%,
+                        transparent 55%
+                    ),
+                    radial-gradient(
+                        ellipse 500px 500px at 90% 60%,
+                        rgba(200, 255, 0, 0.025) 0%,
+                        transparent 50%
+                    );
+                animation: meshDrift 25s ease-in-out infinite alternate;
+            }
+            @keyframes meshDrift {
+                0% {
+                    transform: translate(0, 0) rotate(0deg);
+                }
+                33% {
+                    transform: translate(2%, -1.5%) rotate(0.5deg);
+                }
+                66% {
+                    transform: translate(-1.5%, 2%) rotate(-0.3deg);
+                }
+                100% {
+                    transform: translate(1%, -1%) rotate(0.2deg);
+                }
+            }
+
+            /* Layer 4: Floating orbs with independent motion */
+            .glow-orb {
+                position: fixed;
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 0;
+                will-change: transform;
+            }
+            .glow-orb.a {
+                width: 700px;
+                height: 700px;
+                left: -12%;
+                top: -8%;
+                background: radial-gradient(
+                    circle,
+                    rgba(200, 255, 0, 0.055) 0%,
+                    transparent 65%
+                );
+                filter: blur(100px);
+                animation: orbA 20s ease-in-out infinite alternate;
+            }
+            .glow-orb.b {
+                width: 500px;
+                height: 500px;
+                right: -8%;
+                top: 22%;
+                background: radial-gradient(
+                    circle,
+                    rgba(0, 229, 255, 0.04) 0%,
+                    transparent 65%
+                );
+                filter: blur(120px);
+                animation: orbB 18s ease-in-out infinite alternate;
+            }
+            .glow-orb.c {
+                width: 600px;
+                height: 600px;
+                left: 35%;
+                bottom: -5%;
+                background: radial-gradient(
+                    circle,
+                    rgba(200, 255, 0, 0.035) 0%,
+                    transparent 65%
+                );
+                filter: blur(140px);
+                animation: orbC 22s ease-in-out infinite alternate;
+            }
+            .glow-orb.d {
+                width: 350px;
+                height: 350px;
+                right: 20%;
+                top: 55%;
+                background: radial-gradient(
+                    circle,
+                    rgba(0, 229, 255, 0.03) 0%,
+                    transparent 65%
+                );
+                filter: blur(110px);
+                animation: orbD 16s ease-in-out infinite alternate;
+            }
+            @keyframes orbA {
+                0% {
+                    transform: translate(0, 0) scale(1);
+                }
+                100% {
+                    transform: translate(60px, 40px) scale(1.08);
+                }
+            }
+            @keyframes orbB {
+                0% {
+                    transform: translate(0, 0) scale(1);
+                }
+                100% {
+                    transform: translate(-45px, 30px) scale(0.94);
+                }
+            }
+            @keyframes orbC {
+                0% {
+                    transform: translate(0, 0) scale(1);
+                }
+                100% {
+                    transform: translate(35px, -50px) scale(1.06);
+                }
+            }
+            @keyframes orbD {
+                0% {
+                    transform: translate(0, 0) scale(1);
+                }
+                100% {
+                    transform: translate(-30px, -35px) scale(1.1);
+                }
+            }
+
+            /* Layer 5: Dot grid pattern */
+            .bg-dots {
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: 0;
+                opacity: 0.025;
+                background-image: radial-gradient(
+                    circle,
+                    rgba(255, 255, 255, 0.5) 0.6px,
+                    transparent 0.6px
+                );
+                background-size: 32px 32px;
+            }
+
+            /* Layer 6: Horizontal scan lines (very subtle) */
+            .bg-scanlines {
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: 0;
+                opacity: 0.012;
+                background: repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(255, 255, 255, 0.08) 2px,
+                    rgba(255, 255, 255, 0.08) 4px
+                );
+            }
+
+            .container {
+                width: var(--container);
+                margin: 0 auto;
+                position: relative;
+                z-index: 1;
+            }
+
+            /* Skip link */
+            .skip {
+                position: absolute;
+                left: -9999px;
+                top: 12px;
+                background: var(--surface2);
+                border: 1px solid var(--stroke2);
+                padding: 10px 14px;
+                border-radius: 12px;
+                z-index: 9999;
+                font-size: 13px;
+            }
+            .skip:focus {
+                left: 16px;
+            }
+            :focus-visible {
+                outline: 2px solid rgba(200, 255, 0, 0.5);
+                outline-offset: 3px;
+                border-radius: 8px;
+            }
+
+            /* ─── Reveal system ─── */
+            .r {
+                opacity: 0;
+                transform: translateY(32px);
+                transition:
+                    opacity 0.8s var(--ease3),
+                    transform 0.8s var(--ease3);
+            }
+            .r.on {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            .r.d1 {
+                transition-delay: 0.06s;
+            }
+            .r.d2 {
+                transition-delay: 0.12s;
+            }
+            .r.d3 {
+                transition-delay: 0.18s;
+            }
+            .r.d4 {
+                transition-delay: 0.24s;
+            }
+            .r.d5 {
+                transition-delay: 0.3s;
+            }
+            .r.d6 {
+                transition-delay: 0.36s;
+            }
+
+            /* ════════════════════════════════════════════
+       HEADER
+       ════════════════════════════════════════════ */
+            header {
+                position: sticky;
+                top: 0;
+                z-index: 50;
+                backdrop-filter: blur(20px) saturate(1.2);
+                background: rgba(5, 5, 5, 0.7);
+                border-bottom: 1px solid transparent;
+                transition: border-color 0.3s var(--ease2);
+            }
+            header.scrolled {
+                border-bottom-color: var(--stroke);
+            }
+            .topbar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 18px 0;
+            }
+            .brand {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-family: var(--serif);
+                font-size: 22px;
+                letter-spacing: -0.03em;
+                user-select: none;
+            }
+            .brand-dot {
+                width: 6px;
+                height: 6px;
+                background: var(--accent);
+                border-radius: 50%;
+                box-shadow: 0 0 20px var(--accentGlow3);
+            }
+
+            nav.primary {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .navlink {
+                font-size: 13px;
+                font-weight: 500;
+                color: var(--muted);
+                padding: 8px 14px;
+                border-radius: 999px;
+                transition:
+                    color 0.2s,
+                    background 0.2s;
+                letter-spacing: -0.01em;
+            }
+            .navlink:hover {
+                color: var(--text);
+                background: rgba(255, 255, 255, 0.04);
+            }
+            .navlink[aria-current="true"] {
+                color: var(--text);
+                background: rgba(255, 255, 255, 0.06);
+            }
+
+            .header-actions {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                border-radius: 999px;
+                padding: 10px 20px;
+                border: 1px solid var(--stroke2);
+                background: rgba(255, 255, 255, 0.04);
+                color: var(--text);
+                font-weight: 600;
+                font-size: 13px;
+                cursor: pointer;
+                transition: all 0.2s var(--ease);
+                letter-spacing: -0.01em;
+            }
+            .btn:hover {
+                transform: translateY(-1px);
+                background: rgba(255, 255, 255, 0.07);
+                border-color: rgba(255, 255, 255, 0.18);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            }
+            .btn.primary {
+                background: var(--accent);
+                color: #050505;
+                border-color: transparent;
+                font-weight: 700;
+            }
+            .btn.primary:hover {
+                box-shadow:
+                    0 8px 40px var(--accentGlow3),
+                    0 2px 12px var(--accentGlow2);
+                transform: translateY(-2px);
+                background: var(--accent2);
+            }
+            .btn.lg {
+                padding: 14px 28px;
+                font-size: 15px;
+            }
+            .btn svg {
+                flex-shrink: 0;
+            }
+
+            .burger {
+                display: none;
+                width: 40px;
+                height: 40px;
+                border-radius: 999px;
+                border: 1px solid var(--stroke);
+                background: transparent;
+                cursor: pointer;
+                position: relative;
+            }
+            .burger span,
+            .burger span::before,
+            .burger span::after {
+                display: block;
+                width: 16px;
+                height: 1.5px;
+                background: var(--text);
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                transition: all 0.2s;
+            }
+            .burger span {
+                top: 50%;
+                transform: translate(-50%, -50%);
+            }
+            .burger span::before {
+                content: "";
+                top: -5px;
+                left: 0;
+            }
+            .burger span::after {
+                content: "";
+                top: 5px;
+                left: 0;
+            }
+
+            /* ─── Drawer ─── */
+            .drawer {
+                position: fixed;
+                inset: 0;
+                z-index: 80;
+                background: rgba(0, 0, 0, 0.6);
+                backdrop-filter: blur(12px);
+                display: none;
+                opacity: 0;
+                transition: opacity 0.25s;
+            }
+            .drawer.open {
+                display: block;
+                opacity: 1;
+            }
+            .drawer-panel {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                background: var(--surface);
+                border: 1px solid var(--stroke2);
+                border-radius: 20px;
+                padding: 16px;
+                box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+            }
+            .drawer-head {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding-bottom: 14px;
+                margin-bottom: 10px;
+                border-bottom: 1px solid var(--stroke);
+            }
+            .drawer-links {
+                display: grid;
+                gap: 4px;
+            }
+            .drawer-links a {
+                padding: 14px 16px;
+                border-radius: 14px;
+                font-weight: 600;
+                font-size: 15px;
+                transition: background 0.15s;
+            }
+            .drawer-links a:hover {
+                background: rgba(255, 255, 255, 0.04);
+            }
+            .close-btn {
+                width: 36px;
+                height: 36px;
+                display: grid;
+                place-items: center;
+                border-radius: 999px;
+                border: 1px solid var(--stroke);
+                background: transparent;
+                color: var(--text);
+                cursor: pointer;
+                transition: background 0.15s;
+            }
+            .close-btn:hover {
+                background: rgba(255, 255, 255, 0.06);
+            }
+
+            /* ─── Sections ─── */
+            main {
+                position: relative;
+                z-index: 1;
+            }
+            section {
+                scroll-margin-top: 80px;
+            }
+
+            .tag {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 6px 14px 6px 10px;
+                border-radius: 999px;
+                border: 1px solid var(--stroke);
+                background: rgba(255, 255, 255, 0.02);
+                font-size: 12px;
+                font-weight: 500;
+                color: var(--muted);
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+            }
+            .tag-dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: var(--accent);
+                box-shadow: 0 0 12px var(--accentGlow3);
+            }
+
+            /* ════════════════════════════════════════════
+       HERO
+       ════════════════════════════════════════════ */
+            .hero {
+                padding: clamp(80px, 12vw, 160px) 0 clamp(60px, 8vw, 100px);
+            }
+            .hero-layout {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: clamp(32px, 5vw, 64px);
+                align-items: center;
+            }
+            .hero-content {
+                max-width: 560px;
+            }
+
+            h1 {
+                font-family: var(--serif);
+                font-size: clamp(48px, 6.5vw, 88px);
+                line-height: 0.9;
+                letter-spacing: -0.045em;
+                margin: 20px 0 0;
+                font-weight: 400;
+            }
+            h1 em {
+                font-style: italic;
+                color: var(--accent);
+                position: relative;
+            }
+
+            .hero-desc {
+                font-size: clamp(15px, 1.3vw, 17px);
+                color: var(--text2);
+                margin: 20px 0 0;
+                max-width: 460px;
+                line-height: 1.7;
+            }
+            .hero-ctas {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                margin-top: 28px;
+            }
+            .platforms-inline {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                margin-top: 20px;
+            }
+            .platform-chip {
+                font-family: var(--mono);
+                font-size: 11px;
+                font-weight: 500;
+                padding: 6px 12px;
+                border-radius: 999px;
+                border: 1px solid var(--stroke);
+                color: var(--muted);
+                letter-spacing: 0.02em;
+            }
+
+            /* ─── Stats row ─── */
+            .stats-row {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1px;
+                margin-top: 36px;
+                border-radius: var(--r-lg);
+                overflow: hidden;
+                border: 1px solid var(--stroke);
+                background: var(--stroke);
+            }
+            .stat-item {
+                background: var(--surface);
+                padding: 20px 22px;
+            }
+            .stat-val {
+                font-family: var(--serif);
+                font-size: 28px;
+                letter-spacing: -0.03em;
+                display: flex;
+                align-items: baseline;
+                gap: 6px;
+                color: var(--text);
+            }
+            .stat-val b {
+                color: var(--accent);
+                font-weight: 400;
+            }
+            .stat-val span {
+                font-family: var(--sans);
+                font-size: 13px;
+                color: var(--muted);
+                font-weight: 500;
+            }
+            .stat-desc {
+                font-size: 12px;
+                color: var(--dim);
+                margin-top: 4px;
+                line-height: 1.45;
+            }
+
+            /* ─── Mock / Demo ─── */
+            .mock {
+                border-radius: var(--r-xl);
+                border: 1px solid var(--stroke2);
+                background: var(--surface);
+                box-shadow:
+                    0 32px 80px rgba(0, 0, 0, 0.4),
+                    0 1px 0 rgba(255, 255, 255, 0.03) inset;
+                overflow: hidden;
+                position: relative;
+            }
+            .mock::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                background: linear-gradient(
+                    160deg,
+                    rgba(255, 255, 255, 0.04) 0%,
+                    transparent 40%
+                );
+                pointer-events: none;
+            }
+            .mock-bar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 16px;
+                border-bottom: 1px solid var(--stroke);
+                background: rgba(255, 255, 255, 0.015);
+            }
+            .mock-dots {
+                display: flex;
+                gap: 7px;
+            }
+            .mock-dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.06);
+            }
+            .mock-label {
+                font-family: var(--mono);
+                font-size: 11px;
+                color: var(--dim);
+            }
+            .play-btn {
+                width: 32px;
+                height: 32px;
+                display: grid;
+                place-items: center;
+                border-radius: 50%;
+                border: 1px solid var(--stroke2);
+                background: rgba(255, 255, 255, 0.04);
+                color: var(--text);
+                cursor: pointer;
+                transition: all 0.2s var(--ease);
+            }
+            .play-btn:hover {
+                background: var(--accent);
+                color: #050505;
+                border-color: transparent;
+                box-shadow: 0 0 20px var(--accentGlow2);
+            }
+            .play-btn svg {
+                width: 14px;
+                height: 14px;
+            }
+
+            .mock-body {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                min-height: 340px;
+            }
+            .pane {
+                padding: 16px;
+                position: relative;
+            }
+            .pane + .pane {
+                border-left: 1px solid var(--stroke);
+                background: rgba(255, 255, 255, 0.01);
+            }
+
+            .bubble {
+                border-radius: 14px;
+                border: 1px solid var(--stroke);
+                padding: 12px 14px;
+                margin-bottom: 10px;
+            }
+            .bubble-role {
+                font-family: var(--mono);
+                font-size: 10px;
+                font-weight: 500;
+                color: var(--dim);
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                margin-bottom: 6px;
+            }
+            .bubble-msg {
+                font-size: 13px;
+                color: var(--text2);
+                line-height: 1.6;
+            }
+
+            .stream-indicator {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 14px;
+                border-radius: 12px;
+                border: 1px solid var(--stroke);
+                margin-top: 8px;
+            }
+            .pulse-dot {
+                width: 8px;
+                height: 8px;
+                min-width: 8px;
+                border-radius: 50%;
+                background: var(--accent);
+                animation: pulse 1.8s ease-in-out infinite;
+            }
+            @keyframes pulse {
+                0%,
+                100% {
+                    opacity: 0.3;
+                    transform: scale(0.85);
+                }
+                50% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+            .stream-text {
+                font-family: var(--mono);
+                font-size: 11px;
+                color: var(--dim);
+                line-height: 1.4;
+            }
+
+            .feed-card {
+                border-radius: 14px;
+                border: 1px solid var(--stroke);
+                padding: 14px;
+                margin-bottom: 10px;
+                transition:
+                    border-color 0.2s,
+                    background 0.2s;
+            }
+            .feed-card:hover {
+                border-color: rgba(255, 255, 255, 0.12);
+                background: rgba(255, 255, 255, 0.02);
+            }
+            .feed-head {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 8px;
+                font-family: var(--mono);
+                font-size: 10px;
+                font-weight: 500;
+                color: var(--dim);
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+            .feed-bar-track {
+                height: 4px;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.05);
+                overflow: hidden;
+            }
+            .feed-bar-fill {
+                height: 100%;
+                width: 0%;
+                border-radius: 999px;
+                background: linear-gradient(90deg, var(--accent), var(--cyan));
+                transition: width 1s var(--ease);
+            }
+            .feed-text {
+                font-size: 12px;
+                color: var(--muted);
+                line-height: 1.6;
+                margin-top: 6px;
+            }
+
+            .mock-footer {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 16px;
+                border-top: 1px solid var(--stroke);
+                background: rgba(255, 255, 255, 0.015);
+            }
+            .mock-hint {
+                font-size: 12px;
+                color: var(--dim);
+                max-width: 380px;
+                line-height: 1.5;
+            }
+
+            /* ════════════════════════════════════════════
+       KEYWORD MARQUEE
+       ════════════════════════════════════════════ */
+            .marquee-section {
+                padding: 0;
+                overflow: hidden;
+                border-top: 1px solid var(--stroke);
+                border-bottom: 1px solid var(--stroke);
+                position: relative;
+                background: rgba(255, 255, 255, 0.01);
+            }
+            /* Top and bottom fade masks */
+            .marquee-section::before,
+            .marquee-section::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                width: 120px;
+                z-index: 2;
+                pointer-events: none;
+            }
+            .marquee-section::before {
+                left: 0;
+                background: linear-gradient(90deg, var(--bg), transparent);
+            }
+            .marquee-section::after {
+                right: 0;
+                background: linear-gradient(270deg, var(--bg), transparent);
+            }
+
+            .marquee-track {
+                display: flex;
+                width: max-content;
+                animation: marquee 40s linear infinite;
+            }
+            .marquee-track:hover {
+                animation-play-state: paused;
+            }
+
+            @keyframes marquee {
+                0% {
+                    transform: translateX(0);
+                }
+                100% {
+                    transform: translateX(-50%);
+                }
+            }
+
+            .marquee-set {
+                display: flex;
+                align-items: center;
+                flex-shrink: 0;
+            }
+
+            .mq-item {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                padding: 22px 0;
+                white-space: nowrap;
+            }
+            .mq-word {
+                font-family: var(--serif);
+                font-size: clamp(18px, 2.2vw, 26px);
+                letter-spacing: -0.02em;
+                color: var(--text);
+                transition: color 0.2s;
+            }
+            .mq-item:hover .mq-word {
+                color: var(--accent);
+            }
+            .mq-word.italic {
+                font-style: italic;
+                color: var(--accent);
+            }
+            .mq-sep {
+                width: 5px;
+                height: 5px;
+                border-radius: 50%;
+                background: var(--dim);
+                opacity: 0.4;
+                margin: 0 20px;
+                flex-shrink: 0;
+            }
+
+            /* Second row — reversed direction, different speed */
+            .marquee-track.reverse {
+                animation: marqueeReverse 50s linear infinite;
+            }
+            @keyframes marqueeReverse {
+                0% {
+                    transform: translateX(-50%);
+                }
+                100% {
+                    transform: translateX(0);
+                }
+            }
+
+            .marquee-row + .marquee-row {
+                border-top: 1px solid var(--stroke);
+            }
+            .marquee-row {
+                overflow: hidden;
+                position: relative;
+            }
+            .marquee-row::before,
+            .marquee-row::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                width: 120px;
+                z-index: 2;
+                pointer-events: none;
+            }
+            .marquee-row::before {
+                left: 0;
+                background: linear-gradient(90deg, var(--bg), transparent);
+            }
+            .marquee-row::after {
+                right: 0;
+                background: linear-gradient(270deg, var(--bg), transparent);
+            }
+
+            /* ─── Divider ─── */
+            .divider {
+                width: 100%;
+                height: 1px;
+                background: var(--stroke);
+            }
+
+            /* ─── Platform strip ─── */
+            .compat {
+                padding: 32px 0;
+            }
+            .compat-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+            .compat-label {
+                font-size: 12px;
+                font-weight: 500;
+                color: var(--dim);
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+            .compat-badges {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            .compat-badge {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 14px;
+                border-radius: 999px;
+                border: 1px solid var(--stroke);
+                font-size: 13px;
+                font-weight: 500;
+                color: var(--text2);
+            }
+            .compat-badge::before {
+                content: "";
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: var(--accent);
+                opacity: 0.6;
+            }
+
+            /* ─── Section chrome ─── */
+            .sec {
+                padding: clamp(64px, 8vw, 110px) 0;
+            }
+            .eyebrow {
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
+                color: var(--accent);
+                margin-bottom: 14px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .eyebrow::before {
+                content: "";
+                width: 20px;
+                height: 1px;
+                background: var(--accent);
+                opacity: 0.4;
+            }
+            h2 {
+                font-family: var(--serif);
+                font-size: clamp(32px, 4vw, 56px);
+                line-height: 0.98;
+                letter-spacing: -0.035em;
+                font-weight: 700;
+            }
+            h2 em {
+                color: var(--accent);
+                font-style: italic;
+            }
+            .sec-desc {
+                font-size: clamp(14px, 1.2vw, 16px);
+                color: var(--text2);
+                max-width: 600px;
+                margin-top: 12px;
+                line-height: 1.7;
+            }
+
+            /* ─── Steps ─── */
+            .steps-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1px;
+                margin-top: 40px;
+                border-radius: var(--r-lg);
+                overflow: hidden;
+                border: 1px solid var(--stroke);
+                background: var(--stroke);
+            }
+            .step {
+                background: var(--surface);
+                padding: 32px 28px;
+                transition: background 0.25s;
+            }
+            .step:hover {
+                background: var(--surface2);
+            }
+            .step-num {
+                font-family: var(--mono);
+                font-size: 11px;
+                font-weight: 500;
+                color: var(--dim);
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                margin-bottom: 16px;
+            }
+            .step-title {
+                font-family: var(--serif);
+                font-size: 24px;
+                letter-spacing: -0.02em;
+                margin-bottom: 10px;
+            }
+            .step-desc {
+                font-size: 14px;
+                color: var(--text2);
+                line-height: 1.7;
+            }
+            .step-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                display: grid;
+                place-items: center;
+                background: var(--accentGlow);
+                border: 1px solid rgba(200, 255, 0, 0.1);
+                margin-bottom: 18px;
+                color: var(--accent);
+            }
+            .step-icon svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            /* ─── Features bento ─── */
+            .bento {
+                display: grid;
+                grid-template-columns: repeat(12, 1fr);
+                gap: 10px;
+                margin-top: 40px;
+            }
+            .card {
+                border-radius: var(--r-lg);
+                border: 1px solid var(--stroke);
+                padding: 28px 26px;
+                background: var(--surface);
+                position: relative;
+                overflow: hidden;
+                transition:
+                    border-color 0.25s,
+                    transform 0.25s var(--ease),
+                    box-shadow 0.25s;
+            }
+            .card:hover {
+                border-color: var(--stroke2);
+                transform: translateY(-2px);
+                box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+            }
+            .card::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(
+                    160deg,
+                    rgba(255, 255, 255, 0.025) 0%,
+                    transparent 50%
+                );
+                pointer-events: none;
+            }
+            .card > * {
+                position: relative;
+                z-index: 1;
+            }
+
+            .c-icon {
+                width: 44px;
+                height: 44px;
+                border-radius: 14px;
+                display: grid;
+                place-items: center;
+                border: 1px solid var(--stroke);
+                margin-bottom: 18px;
+                color: var(--text);
+                background: rgba(255, 255, 255, 0.02);
+            }
+            .c-icon svg {
+                width: 20px;
+                height: 20px;
+            }
+            .c-title {
+                font-family: var(--serif);
+                font-size: 22px;
+                letter-spacing: -0.01em;
+                margin-bottom: 8px;
+            }
+            .c-desc {
+                font-size: 14px;
+                color: var(--text2);
+                line-height: 1.7;
+            }
+
+            .s7 {
+                grid-column: span 7;
+            }
+            .s5 {
+                grid-column: span 5;
+            }
+            .s4 {
+                grid-column: span 4;
+            }
+            .s6 {
+                grid-column: span 6;
+            }
+
+            .card.featured {
+                border-color: rgba(200, 255, 0, 0.12);
+                background: linear-gradient(
+                    145deg,
+                    var(--surface),
+                    rgba(200, 255, 0, 0.03)
+                );
+            }
+            .card.featured .c-icon {
+                background: var(--accentGlow);
+                border-color: rgba(200, 255, 0, 0.15);
+                color: var(--accent);
+            }
+
+            /* ════════════════════════════════════════════
+       ACCORDION SYSTEM — Premium glass design
+       ════════════════════════════════════════════ */
+            .accord-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                margin-top: 32px;
+                max-width: 1200px;
+            }
+
+            /* TL;DR box */
+            .tldr-box {
+                grid-column: 1 / -1;
+                border-radius: var(--r-lg);
+                border: 1px solid rgba(200, 255, 0, 0.14);
+                padding: 28px;
+                position: relative;
+                overflow: hidden;
+                background: transparent;
+            }
+            .tldr-box::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background:
+                    linear-gradient(
+                        135deg,
+                        rgba(200, 255, 0, 0.06) 0%,
+                        transparent 50%
+                    ),
+                    radial-gradient(
+                        ellipse 400px 200px at 100% 100%,
+                        rgba(0, 229, 255, 0.04),
+                        transparent
+                    );
+                z-index: 0;
+            }
+            .tldr-box > * {
+                position: relative;
+                z-index: 1;
+            }
+            .tldr-tag {
+                font-family: var(--mono);
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: var(--accent);
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .tldr-tag::before {
+                content: "";
+                width: 16px;
+                height: 1px;
+                background: var(--accent);
+                opacity: 0.5;
+            }
+            .tldr-text {
+                font-size: 15px;
+                color: var(--text2);
+                line-height: 1.75;
+            }
+            .tldr-date {
+                font-size: 12px;
+                color: var(--dim);
+                margin-top: 12px;
+            }
+
+            /* Individual accordion item */
+            .accord {
+                border-radius: var(--r-lg);
+                border: 1px solid var(--stroke);
+                background: var(--surface);
+                overflow: hidden;
+                position: relative;
+                transition:
+                    border-color 0.3s var(--ease2),
+                    box-shadow 0.3s var(--ease2),
+                    background 0.3s;
+            }
+            .accord:hover {
+                border-color: var(--stroke2);
+            }
+            .accord[open] {
+                border-color: var(--stroke2);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+                background: var(--surface2);
+            }
+
+            /* Accent line on left when open */
+            .accord::before {
+                content: "";
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 2px;
+                background: var(--accent);
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+            .accord[open]::before {
+                opacity: 1;
+            }
+
+            /* Summary / trigger */
+            .accord summary {
+                list-style: none;
+                cursor: pointer;
+                padding: 20px 24px;
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            }
+            .accord summary::-webkit-details-marker {
+                display: none;
+            }
+
+            /* Number badge */
+            .accord-num {
+                width: 32px;
+                height: 32px;
+                min-width: 32px;
+                border-radius: 10px;
+                display: grid;
+                place-items: center;
+                font-family: var(--mono);
+                font-size: 11px;
+                font-weight: 500;
+                color: var(--dim);
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid var(--stroke);
+                transition: all 0.3s var(--ease2);
+            }
+            .accord[open] .accord-num {
+                background: var(--accentGlow);
+                border-color: rgba(200, 255, 0, 0.18);
+                color: var(--accent);
+            }
+
+            .accord-head {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+            .accord-title {
+                font-weight: 600;
+                font-size: 15px;
+                letter-spacing: -0.01em;
+                color: var(--text);
+                transition: color 0.2s;
+            }
+            .accord:hover .accord-title {
+                color: var(--text);
+            }
+            .accord-hint {
+                font-size: 12px;
+                color: var(--dim);
+                opacity: 0;
+                max-height: 0;
+                transition:
+                    opacity 0.3s,
+                    max-height 0.3s;
+            }
+            .accord[open] .accord-hint {
+                opacity: 1;
+                max-height: 20px;
+            }
+
+            /* Chevron icon */
+            .accord-chev {
+                width: 32px;
+                height: 32px;
+                min-width: 32px;
+                border-radius: 50%;
+                display: grid;
+                place-items: center;
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid var(--stroke);
+                transition: all 0.3s var(--ease);
+            }
+            .accord-chev svg {
+                width: 14px;
+                height: 14px;
+                transition: transform 0.3s var(--ease);
+                color: var(--muted);
+            }
+            .accord[open] .accord-chev {
+                background: rgba(255, 255, 255, 0.06);
+                border-color: var(--stroke2);
+            }
+            .accord[open] .accord-chev svg {
+                transform: rotate(180deg);
+                color: var(--accent);
+            }
+
+            /* Content body */
+            .accord-body {
+                padding: 0 24px 24px;
+                padding-left: 72px; /* aligned with text, past the number badge */
+                position: relative;
+            }
+            .accord-body::before {
+                content: "";
+                position: absolute;
+                left: 24px;
+                top: -8px;
+                width: calc(100% - 48px);
+                height: 1px;
+                background: linear-gradient(
+                    90deg,
+                    var(--stroke2),
+                    transparent 80%
+                );
+            }
+            .accord-body p,
+            .accord-body > span {
+                font-size: 14px;
+                color: var(--text2);
+                line-height: 1.8;
+            }
+            .accord-body strong {
+                color: var(--text);
+                font-weight: 600;
+            }
+            .accord-body ul {
+                padding-left: 18px;
+                margin-top: 10px;
+            }
+            .accord-body li {
+                margin: 8px 0;
+                font-size: 14px;
+                color: var(--text2);
+                line-height: 1.7;
+            }
+            .accord-body li::marker {
+                color: var(--dim);
+            }
+            .accord-body code {
+                font-family: var(--mono);
+                font-size: 12px;
+                padding: 3px 8px;
+                border-radius: 6px;
+                background: rgba(255, 255, 255, 0.04);
+                border: 1px solid var(--stroke);
+                color: var(--accent);
+            }
+            .accord-body a {
+                color: var(--accent);
+                border-bottom: 1px solid rgba(200, 255, 0, 0.2);
+                transition: border-color 0.15s;
+            }
+            .accord-body a:hover {
+                border-color: var(--accent);
+            }
+
+            /* ─── FAQ specific styling ─── */
+            .accord.faq-item .accord-num {
+                background: var(--cyanGlow);
+                border-color: rgba(0, 229, 255, 0.1);
+                color: var(--cyan);
+                font-size: 13px;
+                font-weight: 700;
+                font-family: var(--serif);
+            }
+            .accord.faq-item[open] .accord-num {
+                background: var(--cyanGlow2);
+                border-color: rgba(0, 229, 255, 0.2);
+                color: var(--cyan);
+            }
+            .accord.faq-item::before {
+                background: var(--cyan);
+            }
+            .accord.faq-item[open] .accord-chev svg {
+                color: var(--cyan);
+            }
+
+            /* ─── CTA ─── */
+            .cta-section {
+                padding: clamp(80px, 10vw, 140px) 0;
+                text-align: center;
+                position: relative;
+            }
+            .cta-section::before {
+                content: "";
+                position: absolute;
+                width: 800px;
+                height: 400px;
+                left: 50%;
+                top: 40%;
+                transform: translate(-50%, -50%);
+                background: radial-gradient(
+                    circle,
+                    var(--accentGlow2) 0%,
+                    transparent 70%
+                );
+                pointer-events: none;
+                filter: blur(40px);
+            }
+            .cta-inner {
+                position: relative;
+                z-index: 1;
+            }
+            .cta-section h2 {
+                font-size: clamp(44px, 6vw, 80px);
+                line-height: 0.92;
+            }
+            .cta-desc {
+                font-size: clamp(14px, 1.2vw, 16px);
+                color: var(--text2);
+                max-width: 480px;
+                margin: 16px auto 28px;
+                line-height: 1.7;
+            }
+            .cta-note {
+                font-size: 12px;
+                color: var(--dim);
+                margin-top: 14px;
+            }
+            .cta-note code {
+                font-family: var(--mono);
+                font-size: 11px;
+                padding: 2px 6px;
+                border-radius: 4px;
+                background: var(--surface2);
+            }
+
+            /* ─── Footer ─── */
+            footer {
+                padding: 24px 0 40px;
+                border-top: 1px solid var(--stroke);
+            }
+            .foot {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 14px;
+                font-size: 13px;
+                color: var(--dim);
+            }
+            .foot a {
+                transition: color 0.15s;
+            }
+            .foot a:hover {
+                color: var(--text);
+            }
+            .foot-links {
+                display: flex;
+                gap: 20px;
+            }
+
+            /* ─── Responsive ─── */
+            @media (max-width: 960px) {
+                nav.primary {
+                    display: none;
+                }
+                .burger {
+                    display: block;
+                }
+                .hero-layout {
+                    grid-template-columns: 1fr;
+                }
+                .hero-content {
+                    max-width: 100%;
+                }
+                .stats-row {
+                    grid-template-columns: 1fr;
+                }
+                .mock-body {
+                    grid-template-columns: 1fr;
+                }
+                .pane + .pane {
+                    border-left: none;
+                    border-top: 1px solid var(--stroke);
+                }
+                .steps-grid {
+                    grid-template-columns: 1fr;
+                }
+                .bento {
+                    grid-template-columns: 1fr;
+                }
+                .s7,
+                .s5,
+                .s6,
+                .s4 {
+                    grid-column: span 1;
+                }
+                .compat-row {
+                    justify-content: center;
+                    text-align: center;
+                }
+                .compat-badges {
+                    justify-content: center;
+                }
+                .accord-body {
+                    padding-left: 24px;
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                html {
+                    scroll-behavior: auto;
+                }
+                .r {
+                    opacity: 1;
+                    transform: none;
+                    transition: none;
+                }
+                .pulse-dot {
+                    animation: none;
+                    opacity: 0.6;
+                }
+                .btn,
+                .card,
+                .step {
+                    transition: none;
+                }
+                .marquee-track {
+                    animation: none !important;
+                }
+                .bg-mesh::before {
+                    animation: none;
+                }
+                .glow-orb {
+                    animation: none;
+                }
+            }
+        </style>
+
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "SoftwareApplication",
+                "name": "Drift",
+                "applicationCategory": "BrowserApplication",
+                "operatingSystem": "Chrome",
+                "description": "Opens a scrollable feed while AI chatbots generate responses, then returns focus when done.",
+                "offers": {
+                    "@type": "Offer",
+                    "price": "0",
+                    "priceCurrency": "USD"
+                }
+            }
+        </script>
+    </head>
+
+    <body>
+        <a class="skip" href="#main">Skip to content</a>
+
+        <!-- ═══ BACKGROUND LAYERS ═══ -->
+        <div class="bg-mesh" aria-hidden="true"></div>
+        <div class="bg-dots" aria-hidden="true"></div>
+        <div class="bg-scanlines" aria-hidden="true"></div>
+        <div class="glow-orb a" aria-hidden="true"></div>
+        <div class="glow-orb b" aria-hidden="true"></div>
+        <div class="glow-orb c" aria-hidden="true"></div>
+        <div class="glow-orb d" aria-hidden="true"></div>
+
+        <!-- ═══ HEADER ═══ -->
+        <header id="header">
+            <div class="container">
+                <div class="topbar">
+                    <a class="brand" href="#top" aria-label="Drift home">
+                        drift<span class="brand-dot" aria-hidden="true"></span>
+                    </a>
+                    <nav class="primary" aria-label="Primary navigation">
+                        <a class="navlink" href="#how">How it works</a>
+                        <a class="navlink" href="#features">Features</a>
+                        <a class="navlink" href="#privacy">Privacy</a>
+                        <a class="navlink" href="#faq">FAQ</a>
+                    </nav>
+                    <div class="header-actions">
+                        <a class="btn" href="#demo">Live demo</a>
+                        <a class="btn primary" href="#install">Add to Chrome</a>
+                        <button
+                            class="burger"
+                            id="menuBtn"
+                            type="button"
+                            aria-label="Open menu"
+                            aria-expanded="false"
+                        >
+                            <span aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ═══ DRAWER ═══ -->
+        <div class="drawer" id="drawer" aria-hidden="true">
+            <div
+                class="drawer-panel"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Menu"
+            >
+                <div class="drawer-head">
+                    <span class="brand" style="font-size: 20px"
+                        >d.rift<span class="brand-dot" aria-hidden="true"></span
+                    ></span>
+                    <button
+                        class="close-btn"
+                        id="closeDrawer"
+                        type="button"
+                        aria-label="Close menu"
+                    >
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                        >
+                            <path d="M6 6l12 12M18 6L6 18" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="drawer-links">
+                    <a href="#how">How it works</a>
+                    <a href="#features">Features</a>
+                    <a href="#privacy">Privacy</a>
+                    <a href="#faq">FAQ</a>
+                    <a href="#install">Add to Chrome</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ MAIN ═══ -->
+        <main id="main">
+            <!-- HERO -->
+            <section class="hero" id="top">
+                <div class="container hero-layout">
+                    <div class="hero-content">
+                        <div class="tag r">
+                            <span class="tag-dot" aria-hidden="true"></span>
+                            Chrome Extension · Free · Zero tracking
+                        </div>
+                        <h1 class="r d1">
+                            Don't watch<br /><em>AI think.</em>
+                        </h1>
+                        <p class="hero-desc r d2">
+                            Drift opens a scrollable feed the moment ChatGPT,
+                            Claude, or Gemini starts generating. When it's done,
+                            you're snapped back. No tab juggling. No accidental
+                            rabbit holes.
+                        </p>
+                        <div class="hero-ctas r d3">
+                            <a class="btn primary lg" href="#install">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2.2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    width="18"
+                                    height="18"
+                                    aria-hidden="true"
+                                >
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M12 8v8M8 12l4 4 4-4" />
+                                </svg>
+                                Add to Chrome
+                            </a>
+                            <a class="btn" href="#how">See how it works</a>
+                        </div>
+                        <div class="platforms-inline r d4">
+                            <span class="platform-chip">ChatGPT</span>
+                            <span class="platform-chip">Claude</span>
+                            <span class="platform-chip">Gemini</span>
+                            <span class="platform-chip">0 bytes collected</span>
+                        </div>
+                        <div class="stats-row r d5">
+                            <div class="stat-item">
+                                <div class="stat-val">
+                                    <b id="counter">0</b><span>seconds</span>
+                                </div>
+                                <div class="stat-desc">
+                                    Wait time reclaimed since you opened this
+                                    page
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-val">
+                                    <b>3</b><span>platforms</span>
+                                </div>
+                                <div class="stat-desc">
+                                    Supported out of the box, no setup required
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-val">
+                                    <b>0</b><span>data</span>
+                                </div>
+                                <div class="stat-desc">
+                                    Collected, transmitted, or sold — ever
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MOCK -->
+                    <div class="mock r d2" id="demo">
+                        <div class="mock-bar">
+                            <div class="mock-dots" aria-hidden="true">
+                                <div class="mock-dot"></div>
+                                <div class="mock-dot"></div>
+                                <div class="mock-dot"></div>
+                            </div>
+                            <div class="mock-label">Live preview</div>
+                            <button
+                                class="play-btn"
+                                id="playDemo"
+                                type="button"
+                                aria-label="Play demo"
+                            >
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2.5"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M8 5v14l11-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="mock-body" id="mockBody">
+                            <div class="pane">
+                                <div class="bubble">
+                                    <div class="bubble-role">You</div>
+                                    <div class="bubble-msg">
+                                        Explain why my code bugs out when I
+                                        update state in a loop.
+                                    </div>
+                                </div>
+                                <div class="bubble">
+                                    <div class="bubble-role">AI</div>
+                                    <div class="bubble-msg" id="aiMsg">
+                                        Generating…
+                                    </div>
+                                </div>
+                                <div class="stream-indicator" id="streamRow">
+                                    <div
+                                        class="pulse-dot"
+                                        aria-hidden="true"
+                                    ></div>
+                                    <span class="stream-text" id="streamLabel"
+                                        >Model is thinking. Drift will open if
+                                        this takes long enough.</span
+                                    >
+                                </div>
+                            </div>
+                            <div class="pane" id="feedPane">
+                                <div class="feed-card">
+                                    <div class="feed-head">
+                                        <span>Drift feed</span
+                                        ><span id="feedStatus">idle</span>
+                                    </div>
+                                    <div class="feed-bar-track">
+                                        <div
+                                            class="feed-bar-fill"
+                                            id="feedBar"
+                                        ></div>
+                                    </div>
+                                </div>
+                                <div class="feed-card">
+                                    <div class="feed-head">
+                                        <span>Your choice</span
+                                        ><span>anything</span>
+                                    </div>
+                                    <div class="feed-text">
+                                        Reels, Reddit, YouTube, news, comics —
+                                        Drift doesn't judge. It just prevents
+                                        the "opened a tab and lost my brain"
+                                        problem.
+                                    </div>
+                                </div>
+                                <div class="feed-card">
+                                    <div class="feed-head">
+                                        <span>Auto-return</span
+                                        ><span>1 click</span>
+                                    </div>
+                                    <div class="feed-text">
+                                        When generation ends, Drift nudges you
+                                        back. The point is less scrolling, not
+                                        more.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mock-footer">
+                            <div class="mock-hint">
+                                Press play to simulate short vs. long answer
+                                behavior.
+                            </div>
+                            <a
+                                class="btn primary"
+                                href="#install"
+                                style="padding: 8px 16px; font-size: 12px"
+                                >Install</a
+                            >
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ KEYWORD MARQUEE ═══ -->
+            <section class="marquee-section" aria-label="Product keywords">
+                <div class="marquee-row">
+                    <div class="marquee-track" aria-hidden="true">
+                        <div class="marquee-set">
+                            <div class="mq-item">
+                                <span class="mq-word">Secure</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Effortless</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Private</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Seamless</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Zero telemetry</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Invisible</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Instant return</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Focused</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">No distractions</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Lightweight</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Open source</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Automatic</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Reclaim</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Context-aware</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Smart</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Configurable</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Minimal</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Non-intrusive</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Elegant</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Client-side only</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Clean</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">No tracking</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Transparent</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Free forever</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                        </div>
+                        <div class="marquee-set">
+                            <div class="mq-item">
+                                <span class="mq-word">Secure</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Effortless</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Private</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Seamless</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Zero telemetry</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Invisible</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Instant return</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Focused</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">No distractions</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Lightweight</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Open source</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Automatic</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Reclaim</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Context-aware</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Smart</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Configurable</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Minimal</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Non-intrusive</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Elegant</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Client-side only</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Clean</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">No tracking</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word italic">Transparent</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                            <div class="mq-item">
+                                <span class="mq-word">Free forever</span
+                                ><span class="mq-sep"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- COMPAT STRIP -->
+            <section class="compat">
+                <div class="container">
+                    <div class="compat-row r">
+                        <div class="compat-label">
+                            Works with what you already use
+                        </div>
+                        <div class="compat-badges">
+                            <div class="compat-badge">ChatGPT</div>
+                            <div class="compat-badge">Claude</div>
+                            <div class="compat-badge">Gemini</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- HOW IT WORKS -->
+            <section class="sec" id="how">
+                <div class="container">
+                    <div class="r">
+                        <div class="eyebrow">How it works</div>
+                        <h2>Three steps. Then it's<br /><em>automatic.</em></h2>
+                        <p class="sec-desc">
+                            You keep your workflow. Drift quietly handles the
+                            dead time between prompt and response.
+                        </p>
+                    </div>
+                    <div class="steps-grid">
+                        <div class="step r d1">
+                            <div class="step-icon">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path
+                                        d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"
+                                    />
+                                </svg>
+                            </div>
+                            <div class="step-num">01</div>
+                            <div class="step-title">Ask your AI</div>
+                            <div class="step-desc">
+                                Send a prompt to ChatGPT, Claude, or Gemini.
+                                Drift detects the moment streaming starts.
+                            </div>
+                        </div>
+                        <div class="step r d2">
+                            <div class="step-icon">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <rect
+                                        x="2"
+                                        y="3"
+                                        width="20"
+                                        height="14"
+                                        rx="2"
+                                    />
+                                    <path d="M8 21h8M12 17v4" />
+                                </svg>
+                            </div>
+                            <div class="step-num">02</div>
+                            <div class="step-title">Drift opens</div>
+                            <div class="step-desc">
+                                After a configurable delay, a second window
+                                appears with your chosen feed. Short answers
+                                stay uninterrupted.
+                            </div>
+                        </div>
+                        <div class="step r d3">
+                            <div class="step-icon">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <polyline points="15 10 20 15 15 20" />
+                                    <path d="M4 4v7a4 4 0 004 4h12" />
+                                </svg>
+                            </div>
+                            <div class="step-num">03</div>
+                            <div class="step-title">Come back</div>
+                            <div class="step-desc">
+                                When generation ends, a subtle notification
+                                snaps you back instantly. Context stays intact.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FEATURES -->
+            <section class="sec" id="features">
+                <div class="container">
+                    <div class="r">
+                        <div class="eyebrow">Features</div>
+                        <h2>
+                            Built to disappear into<br />your <em>workflow.</em>
+                        </h2>
+                        <p class="sec-desc">
+                            No nagging, no gamification, no productivity
+                            theater. Just a clean mechanism that turns waiting
+                            into optional scrolling.
+                        </p>
+                    </div>
+                    <div class="bento">
+                        <div class="card featured s7 r d1">
+                            <div class="c-icon">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path
+                                        d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"
+                                    />
+                                </svg>
+                            </div>
+                            <div class="c-title">Automatic detection</div>
+                            <div class="c-desc">
+                                Drift watches for response generation via DOM
+                                observation. No hotkeys, no extra clicks — it
+                                triggers exactly when streaming begins.
+                            </div>
+                        </div>
+                        <div class="card s5 r d2">
+                            <div class="c-icon">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <rect
+                                        x="2"
+                                        y="3"
+                                        width="20"
+                                        height="14"
+                                        rx="2"
+                                    />
+                                    <path d="M8 21h8M12 17v4" />
+                                </svg>
+                            </div>
+                            <div class="c-title">Calibration mode</div>
+                            <div class="c-desc">
+                                Drag, resize, and save the Drift window exactly
+                                where you want it. Layout persists across
+                                sessions.
+                            </div>
+                        </div>
+                        <div class="card s4 r d1">
+                            <div class="c-icon">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M12 6v6l4 2" />
+                                </svg>
+                            </div>
+                            <div class="c-title">Smart trigger delay</div>
+                            <div class="c-desc">
+                                Only opens for real waits. Tiny responses stay
+                                completely uninterrupted.
+                            </div>
+                        </div>
+                        <div class="card s4 r d2">
+                            <div class="c-icon">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path
+                                        d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"
+                                    />
+                                    <path d="M13.73 21a2 2 0 01-3.46 0" />
+                                </svg>
+                            </div>
+                            <div class="c-title">Floating notifications</div>
+                            <div class="c-desc">
+                                A subtle indicator shows generation state and
+                                lets you jump back with one click.
+                            </div>
+                        </div>
+                        <div class="card s4 r d3">
+                            <div class="c-icon">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path
+                                        d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+                                    />
+                                </svg>
+                            </div>
+                            <div class="c-title">Zero data collection</div>
+                            <div class="c-desc">
+                                No analytics. No servers. Settings stay local
+                                via Chrome storage APIs. That's it.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PRIVACY -->
+            <section class="sec" id="privacy">
+                <div class="container">
+                    <div class="r">
+                        <div class="eyebrow">Privacy</div>
+                        <h2>Your data stays <em>yours.</em></h2>
+                        <p class="sec-desc">
+                            The privacy section is long because "we don't track
+                            you" apparently needs documentation now. Here you
+                            go.
+                        </p>
+                    </div>
+
+                    <div class="accord-grid">
+                        <div class="tldr-box r d1">
+                            <div class="tldr-tag">TL;DR</div>
+                            <p class="tldr-text">
+                                Drift does not collect, transmit, or share any
+                                personal data. Settings are stored locally on
+                                your device using Chrome's built-in storage
+                                APIs. Nothing leaves your browser.
+                            </p>
+                            <p class="tldr-date">
+                                Last updated: February 7, 2026
+                            </p>
+                        </div>
+
+                        <details class="accord r d2" open>
+                            <summary>
+                                <span class="accord-num">01</span>
+                                <span class="accord-head">
+                                    <span class="accord-title"
+                                        >What Drift does</span
+                                    >
+                                    <span class="accord-hint"
+                                        >Core functionality explained</span
+                                    >
+                                </span>
+                                <span class="accord-chev"
+                                    ><svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <polyline
+                                            points="6 9 12 15 18 9"
+                                        /></svg
+                                ></span>
+                            </summary>
+                            <div class="accord-body">
+                                <p>
+                                    Drift automatically opens a scrollable feed
+                                    in a separate window while AI chatbots
+                                    (ChatGPT, Claude, Gemini) generate
+                                    responses. When generation ends, Drift
+                                    notifies you so you can return to your
+                                    conversation.
+                                </p>
+                            </div>
+                        </details>
+
+                        <details class="accord r d3">
+                            <summary>
+                                <span class="accord-num">02</span>
+                                <span class="accord-head">
+                                    <span class="accord-title"
+                                        >Data we collect</span
+                                    >
+                                    <span class="accord-hint"
+                                        >Spoiler: absolutely nothing</span
+                                    >
+                                </span>
+                                <span class="accord-chev"
+                                    ><svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <polyline
+                                            points="6 9 12 15 18 9"
+                                        /></svg
+                                ></span>
+                            </summary>
+                            <div class="accord-body">
+                                <p>
+                                    <strong>None.</strong> Drift does not
+                                    collect personal information, browsing
+                                    history, keystrokes, form data,
+                                    authentication tokens, or any other user
+                                    data.
+                                </p>
+                            </div>
+                        </details>
+
+                        <details class="accord r d4">
+                            <summary>
+                                <span class="accord-num">03</span>
+                                <span class="accord-head">
+                                    <span class="accord-title"
+                                        >Data stored locally</span
+                                    >
+                                    <span class="accord-hint"
+                                        >What lives on your machine</span
+                                    >
+                                </span>
+                                <span class="accord-chev"
+                                    ><svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <polyline
+                                            points="6 9 12 15 18 9"
+                                        /></svg
+                                ></span>
+                            </summary>
+                            <div class="accord-body">
+                                <p>
+                                    Drift stores the following data locally
+                                    using <code>chrome.storage</code>:
+                                </p>
+                                <ul>
+                                    <li>
+                                        <strong>User preferences:</strong>
+                                        window size, position, trigger delay,
+                                        focus behavior, and display settings.
+                                    </li>
+                                    <li>
+                                        <strong>Calibration data:</strong> saved
+                                        position and dimensions of the drift
+                                        window.
+                                    </li>
+                                    <li>
+                                        <strong>Session state:</strong>
+                                        temporary flags for onboarding and
+                                        whether a drift window is open.
+                                    </li>
+                                    <li>
+                                        <strong>Usage counter:</strong> local
+                                        count of drift openings (only for UI
+                                        prompts).
+                                    </li>
+                                </ul>
+                            </div>
+                        </details>
+
+                        <details class="accord r d5">
+                            <summary>
+                                <span class="accord-num">04</span>
+                                <span class="accord-head">
+                                    <span class="accord-title"
+                                        >Permissions explained</span
+                                    >
+                                    <span class="accord-hint"
+                                        >Why we ask, what we do</span
+                                    >
+                                </span>
+                                <span class="accord-chev"
+                                    ><svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <polyline
+                                            points="6 9 12 15 18 9"
+                                        /></svg
+                                ></span>
+                            </summary>
+                            <div class="accord-body">
+                                <ul>
+                                    <li>
+                                        <strong>storage:</strong> save settings
+                                        locally.
+                                    </li>
+                                    <li>
+                                        <strong>tabs:</strong> detect which AI
+                                        tab is active.
+                                    </li>
+                                    <li>
+                                        <strong>windows:</strong>
+                                        create/position/close the drift window.
+                                    </li>
+                                    <li>
+                                        <strong>alarms:</strong> periodic
+                                        cleanup for orphaned windows after
+                                        service worker restarts.
+                                    </li>
+                                    <li>
+                                        <strong
+                                            >Host access to AI sites:</strong
+                                        >
+                                        inject content scripts to detect
+                                        generation start/end.
+                                    </li>
+                                    <li>
+                                        <strong
+                                            >Host access to Instagram:</strong
+                                        >
+                                        inject a small calibration overlay (if
+                                        chosen).
+                                    </li>
+                                </ul>
+                            </div>
+                        </details>
+
+                        <details class="accord r d6">
+                            <summary>
+                                <span class="accord-num">05</span>
+                                <span class="accord-head">
+                                    <span class="accord-title">Contact</span>
+                                    <span class="accord-hint"
+                                        >Reach out anytime</span
+                                    >
+                                </span>
+                                <span class="accord-chev"
+                                    ><svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <polyline
+                                            points="6 9 12 15 18 9"
+                                        /></svg
+                                ></span>
+                            </summary>
+                            <div class="accord-body">
+                                <p>
+                                    Questions? Email
+                                    <a href="mailto:fireheartjerry@gmail.com"
+                                        >fireheartjerry@gmail.com</a
+                                    >.
+                                </p>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ -->
+            <section class="sec" id="faq">
+                <div class="container">
+                    <div class="r">
+                        <div class="eyebrow">FAQ</div>
+                        <h2>Stuff people ask anyway</h2>
+                        <p class="sec-desc">
+                            Mostly because nobody trusts anything on the
+                            internet. Understandable.
+                        </p>
+                    </div>
+
+                    <div class="accord-grid">
+                        <details class="accord faq-item r d1">
+                            <summary>
+                                <span class="accord-num">Q</span>
+                                <span class="accord-head">
+                                    <span class="accord-title"
+                                        >Is this "a distraction app"?</span
+                                    >
+                                    <span class="accord-hint"
+                                        >The opposite, actually</span
+                                    >
+                                </span>
+                                <span class="accord-chev"
+                                    ><svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <polyline
+                                            points="6 9 12 15 18 9"
+                                        /></svg
+                                ></span>
+                            </summary>
+                            <div class="accord-body">
+                                <p>
+                                    No. It's a waiting app. Drift only shows up
+                                    when you're already idle, and it pulls you
+                                    back when the response is done. The goal is
+                                    fewer accidental 20-minute spirals.
+                                </p>
+                            </div>
+                        </details>
+
+                        <details class="accord faq-item r d2">
+                            <summary>
+                                <span class="accord-num">Q</span>
+                                <span class="accord-head">
+                                    <span class="accord-title"
+                                        >Will it interrupt short answers?</span
+                                    >
+                                    <span class="accord-hint"
+                                        >Nope — smart delay handles it</span
+                                    >
+                                </span>
+                                <span class="accord-chev"
+                                    ><svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <polyline
+                                            points="6 9 12 15 18 9"
+                                        /></svg
+                                ></span>
+                            </summary>
+                            <div class="accord-body">
+                                <p>
+                                    You set a trigger delay. If the model
+                                    answers quickly, Drift never opens.
+                                </p>
+                            </div>
+                        </details>
+
+                        <details class="accord faq-item r d3">
+                            <summary>
+                                <span class="accord-num">Q</span>
+                                <span class="accord-head">
+                                    <span class="accord-title"
+                                        >Does Drift read my chats?</span
+                                    >
+                                    <span class="accord-hint"
+                                        >Zero access to your content</span
+                                    >
+                                </span>
+                                <span class="accord-chev"
+                                    ><svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <polyline
+                                            points="6 9 12 15 18 9"
+                                        /></svg
+                                ></span>
+                            </summary>
+                            <div class="accord-body">
+                                <p>
+                                    The extension detects the presence of
+                                    generation states on supported sites. It
+                                    does not store or transmit your conversation
+                                    content.
+                                </p>
+                            </div>
+                        </details>
+
+                        <details class="accord faq-item r d4">
+                            <summary>
+                                <span class="accord-num">Q</span>
+                                <span class="accord-head">
+                                    <span class="accord-title"
+                                        >Can I choose the feed?</span
+                                    >
+                                    <span class="accord-hint"
+                                        >Your browser, your rules</span
+                                    >
+                                </span>
+                                <span class="accord-chev"
+                                    ><svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <polyline
+                                            points="6 9 12 15 18 9"
+                                        /></svg
+                                ></span>
+                            </summary>
+                            <div class="accord-body">
+                                <p>
+                                    Yes. Anything that can be opened in a
+                                    browser window is fair game.
+                                </p>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA -->
+            <section class="cta-section" id="install">
+                <div class="container cta-inner r">
+                    <h2>Reclaim<br />the <em>wait.</em></h2>
+                    <p class="cta-desc">
+                        Free. Private. Installs in two seconds. Works the moment
+                        you send your next prompt.
+                    </p>
+                    <a
+                        class="btn primary lg"
+                        href="#"
+                        style="font-size: 16px; padding: 16px 32px"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            width="18"
+                            height="18"
+                            aria-hidden="true"
+                        >
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 8v8M8 12l4 4 4-4" />
+                        </svg>
+                        Add to Chrome — It's Free
+                    </a>
+                    <p class="cta-note">
+                        Replace the <code>href="#"</code> with your Chrome Web
+                        Store link.
+                    </p>
+                </div>
+            </section>
+
+            <!-- FOOTER -->
+            <footer>
+                <div class="container foot">
+                    <div>
+                        © 2026 <span style="color: var(--accent)">Drift</span>
+                    </div>
+                    <div class="foot-links">
+                        <a href="#privacy">Privacy</a>
+                        <a href="mailto:fireheartjerry@gmail.com">Contact</a>
+                    </div>
+                </div>
+            </footer>
+        </main>
+
+        <script>
+            /* ─── Scroll reveal ─── */
+            (() => {
+                const els = document.querySelectorAll(".r");
+                if (!("IntersectionObserver" in window)) {
+                    els.forEach((el) => el.classList.add("on"));
+                    return;
+                }
+                const io = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach((e) => {
+                            if (e.isIntersecting) {
+                                e.target.classList.add("on");
+                                io.unobserve(e.target);
+                            }
+                        });
+                    },
+                    { threshold: 0.08, rootMargin: "0px 0px -40px 0px" },
+                );
+                els.forEach((el) => io.observe(el));
+            })();
+
+            /* ─── Header scroll ─── */
+            (() => {
+                const h = document.getElementById("header");
+                const check = () => h.classList.toggle("scrolled", scrollY > 8);
+                check();
+                addEventListener("scroll", check, { passive: true });
+            })();
+
+            /* ─── Smooth scroll ─── */
+            document.querySelectorAll('a[href^="#"]').forEach((a) => {
+                a.addEventListener("click", (e) => {
+                    const href = a.getAttribute("href");
+                    if (!href || href === "#") return;
+                    const t = document.querySelector(href);
+                    if (!t) return;
+                    e.preventDefault();
+                    t.scrollIntoView({ behavior: "smooth", block: "start" });
+                });
+            });
+
+            /* ─── Drawer ─── */
+            (() => {
+                const drawer = document.getElementById("drawer");
+                const btn = document.getElementById("menuBtn");
+                const close = document.getElementById("closeDrawer");
+                const open = () => {
+                    drawer.classList.add("open");
+                    drawer.setAttribute("aria-hidden", "false");
+                    btn.setAttribute("aria-expanded", "true");
+                    document.body.style.overflow = "hidden";
+                };
+                const shut = () => {
+                    drawer.classList.remove("open");
+                    drawer.setAttribute("aria-hidden", "true");
+                    btn.setAttribute("aria-expanded", "false");
+                    document.body.style.overflow = "";
+                };
+                btn.addEventListener("click", open);
+                close.addEventListener("click", shut);
+                drawer.addEventListener("click", (e) => {
+                    if (e.target === drawer) shut();
+                });
+                drawer
+                    .querySelectorAll("a")
+                    .forEach((a) => a.addEventListener("click", shut));
+                addEventListener("keydown", (e) => {
+                    if (e.key === "Escape") shut();
+                });
+            })();
+
+            /* ─── Counter ─── */
+            (() => {
+                const el = document.getElementById("counter");
+                const start = Date.now();
+                const tick = () => {
+                    el.textContent = Math.floor(
+                        (Date.now() - start) / 1000,
+                    ).toLocaleString();
+                };
+                tick();
+                setInterval(tick, 1000);
+            })();
+
+            /* ─── Demo ─── */
+            (() => {
+                const btn = document.getElementById("playDemo");
+                const aiMsg = document.getElementById("aiMsg");
+                const streamLabel = document.getElementById("streamLabel");
+                const feedStatus = document.getElementById("feedStatus");
+                const feedBar = document.getElementById("feedBar");
+                let running = false;
+                const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+                btn.addEventListener("click", async () => {
+                    if (running) return;
+                    running = true;
+                    feedBar.style.width = "0%";
+                    feedStatus.textContent = "idle";
+                    aiMsg.textContent = "Generating…";
+                    streamLabel.textContent =
+                        "Model is thinking. Drift will open if this takes long enough.";
+
+                    feedStatus.textContent = "waiting";
+                    await sleep(700);
+                    aiMsg.textContent = "Quick answer. Drift stays closed.";
+                    streamLabel.textContent =
+                        "Fast response detected — no window opened.";
+                    feedBar.style.width = "22%";
+                    await sleep(900);
+
+                    aiMsg.textContent = "Generating…";
+                    streamLabel.textContent =
+                        "Long generation detected — Drift opens your feed.";
+                    feedStatus.textContent = "open";
+                    feedBar.style.width = "78%";
+                    await sleep(1200);
+
+                    aiMsg.textContent =
+                        "Done. Drift nudges you back to the chat.";
+                    streamLabel.textContent =
+                        "Generation complete. Click once to return.";
+                    feedStatus.textContent = "return";
+                    feedBar.style.width = "100%";
+
+                    await sleep(900);
+                    running = false;
+                });
+            })();
+
+            /* ─── Active nav ─── */
+            (() => {
+                const links = document.querySelectorAll("nav.primary .navlink");
+                const ids = [...links]
+                    .map((a) => a.getAttribute("href"))
+                    .filter((h) => h?.startsWith("#") && h.length > 1);
+                const sections = ids
+                    .map((id) => document.querySelector(id))
+                    .filter(Boolean);
+                if (!sections.length) return;
+                const map = new Map();
+                links.forEach((a) => map.set(a.getAttribute("href"), a));
+                const io = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach((e) => {
+                            if (e.isIntersecting) {
+                                links.forEach((a) =>
+                                    a.setAttribute("aria-current", "false"),
+                                );
+                                const a = map.get("#" + e.target.id);
+                                if (a) a.setAttribute("aria-current", "true");
+                            }
+                        });
+                    },
+                    { threshold: 0.35 },
+                );
+                sections.forEach((s) => io.observe(s));
+            })();
+        </script>
+    </body>
+</html>
