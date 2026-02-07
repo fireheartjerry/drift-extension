@@ -295,14 +295,25 @@
                 position: sticky;
                 top: 0;
                 z-index: 50;
-                backdrop-filter: blur(20px) saturate(1.2);
-                background: rgba(5, 5, 5, 0.7);
-                border-bottom: 1px solid transparent;
-                transition: border-color 0.3s var(--ease2), box-shadow 0.3s var(--ease2);
+                backdrop-filter: blur(10px) saturate(1.4);
+                background: rgba(5, 5, 5, 0.25);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset,
+                            0 4px 24px rgba(0, 0, 0, 0.3);
+                transition: border-color 0.3s var(--ease2), box-shadow 0.3s var(--ease2), background 0.3s var(--ease2);
+            }
+            header::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
+                pointer-events: none;
             }
             header.scrolled {
-                border-bottom-color: var(--stroke);
-                box-shadow: var(--elev-1);
+                border-bottom-color: rgba(255, 255, 255, 0.12);
+                background: rgba(5, 5, 5, 0.35);
+                box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset,
+                            0 8px 32px rgba(0, 0, 0, 0.5);
             }
             .topbar {
                 display: flex;
@@ -345,11 +356,23 @@
                 color: var(--muted);
                 padding: 8px 14px;
                 border-radius: 999px;
-                transition: color 0.2s, background 0.2s;
+                transition: color 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
                 letter-spacing: -0.01em;
+                border: 1px solid transparent;
             }
-            .navlink:hover { color: var(--text); background: rgba(255,255,255,0.04); }
-            .navlink[aria-current="page"] { color: var(--text); background: rgba(255,255,255,0.06); }
+            .navlink:hover { 
+                color: var(--text); 
+                background: rgba(255,255,255,0.06); 
+                border-color: rgba(255,255,255,0.08);
+            }
+            .navlink[aria-current="page"] { 
+                color: var(--accent); 
+                background: rgba(200, 255, 0, 0.12);
+                border-color: rgba(200, 255, 0, 0.2);
+                box-shadow: 0 0 16px rgba(200, 255, 0, 0.15),
+                            0 1px 0 rgba(200, 255, 0, 0.1) inset;
+                font-weight: 600;
+            }
 
             .header-actions {
                 display: flex;
